@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+
+<html> 
+<!-- 
+
+clabbers scrabble switch
+
+test
+
+add stuff to DOM only once
+
+ajax tutorial
+use ajax to load dictionary after board/hand
+
+Clean up unneeded functions
+Refactor
+
+How to call function as argument?
+Re-write findPlayPlus using function handler
+
+lookup: Handlebars tutorial
+Place Board and Hand using Handlebars templates
+
+Re-write filtering functions findPlay, etc. using Jquery.grep
+
+How do we access the empty Square objects we create when we create a Board? How do we define multiple variables within a loop? eval? Should we even use a Square object or just add the traits we need to the array?
+
+bug reporting e-mail
+
+BUGS:
+TypeError when submitWord is called with no letters played on board
+Non-fatal error when placing two tiles not touching each other
+Fatal error sometimes after hitting swap tiles??
+ -->
+ 
+<head>
+	<link rel="stylesheet" type="text/css" href="static/style.css" />
+	<title>Clabbers</title>
+	<meta charset="UTF-8">
+</head>
+
+<body>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" ></script>
+<script src="static/ospd.js"></script>
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+var HAND_SIZE = 7,
+BOARD_HEIGHT = 15,
+BOARD_WIDTH = 15,
+
+LETTER_VALUES = {"A": 1, "B": 3, "C": 3, "D": 2, "E": 1, "F": 4, "G": 2, "H": 4, "I": 1, "J": 8, "K": 5, "L": 1, "M": 3, "N": 1, "O": 1, "P": 3, "Q": 10, "R": 1, "S": 1, "T": 1, "U": 1, "V": 4, "W": 4, "X": 8, "Y": 4, "Z": 10, "*": 0},
+
+LETTER_COUNTS = {"A": 9, "B": 2, "C": 2, "D": 4, "E": 12, "F": 2, "G": 3, "H": 2, "I": 9, "J": 1, "K": 1, "L": 4, "M": 2, "N": 6, "O": 8, "P": 2, "Q": 1, "R": 6, "S": 4, "T": 6, "U": 4, "V": 2, "W": 2, "X": 1, "Y": 2, "Z": 1, "*": 2},
+
+LETTER_VOWELS = ["A", "E", "I", "O", "U"],
+
+anagramsOn = true,
+
+boardSpecialsText = [
+	['TW', '   ', '   ', 'DL', '   ', '   ', '   ', 'TW', '   ', '   ', '   ', 'DL', '   ', '   ', 'TW'],
+	['   ', 'DW', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'DW', '   '],
+	['   ', '   ', 'DW', '   ', '   ', '   ', 'DL', '   ', 'DL', '   ', '   ', '   ', 'DW', '   ', '   '],
+	['DL', '   ', '   ', 'DW', '   ', '   ', '   ', 'DL', '   ', '   ', '   ', 'DW', '   ', '   ', 'DL'],
+	['   ', '   ', '   ', '   ', 'DW', '   ', '   ', '   ', '   ', '   ', 'DW', '   ', '   ', '   ', '   '],
+	['   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   '],
+	['   ', '   ', 'DL', '   ', '   ', '   ', 'DL', '   ', 'DL', '   ', '   ', '   ', 'DL', '   ', '   '],
+	['TW', '   ', '   ', 'DL', '   ', '   ', '   ', 'ST', '   ', '   ', '   ', 'DL', '   ', '   ', 'TW'],
+	['   ', '   ', 'DL', '   ', '   ', '   ', 'DL', '   ', 'DL', '   ', '   ', '   ', 'DL', '   ', '   '],
+	['   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   '],
+	['   ', '   ', '   ', '   ', 'DW', '   ', '   ', '   ', '   ', '   ', 'DW', '   ', '   ', '   ', '   '],
+	['DL', '   ', '   ', 'DW', '   ', '   ', '   ', 'DL', '   ', '   ', '   ', 'DW', '   ', '   ', 'DL'],
+	['   ', '   ', 'DW', '   ', '   ', '   ', 'DL', '   ', 'DL', '   ', '   ', '   ', 'DW', '   ', '   '],
+	['   ', 'DW', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'DW', '   '],
+	['TW', '   ', '   ', 'DL', '   ', '   ', '   ', 'TW', '   ', '   ', '   ', 'DL', '   ', '   ', 'TW']
+],
+boardSpecials = [
+	['TW', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'TW', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'TW'],
+	['empty', 'DW', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'DW', 'empty'],
+	['empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'DL', 'empty', 'DL', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty'],
+	['DL', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'DL'],
+	['empty', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'empty'],
+	['empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty'],
+	['empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'DL', 'empty', 'DL', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty'],
+	['TW', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'start', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'TW'],
+	['empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'DL', 'empty', 'DL', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty'],
+	['empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty'],
+	['empty', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'empty'],
+	['DL', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'DL'],
+	['empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'DL', 'empty', 'DL', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty'],
+	['empty', 'DW', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'DW', 'empty'],
+	['TW', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'TW', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'TW']
+],
+boardSpecialsCheck = function () {
+	for (var i = 0; i < boardSpecials.length; i++) {
+		if (boardSpecials[i].length != BOARD_WIDTH)
+			return false;
+	}
+	if (boardSpecials.length != BOARD_HEIGHT)
+		return false;
+	return true;
+};
+console.log('boardSpecialsCheck: ' + boardSpecialsCheck());
+
+// How many identical values between array1 and array2 where array1 and array2 are composed of arrays of length two
+function matches(array1, array2) {
+	var count = 0;
+	for (var i = 0; i < array1.length; i++) {
+		for (var j = 0; j <array2.length; j++) {
+			if (array1[i][0] == array2[j][0] && array1[i][1] == array2[j][1])
+				count += 1;
+		}
+	}
+	return count;
+}
+
+function equalArrayOfLengthTwo(a, b) {
+	return a[0] == b[0] && a[1] == b[1];
+}
+
+function randomInteger(below) {
+	return Math.floor(Math.random() * below);
+}
+
+// Is string1 an anagram of string2?
+function anagram(string1, string2) {
+	var string1Array = [],
+		string2Array = [];
+	for (var i = 0; i < string1.length; i++) {
+		string1Array.push(string1[i]);
+	}
+	for (var i = 0; i < string2.length; i++) {
+		string2Array.push(string2[i]);
+	}
+	$.each(string1Array, function(i, element) {
+		if (string2Array.indexOf(element) != -1) {
+			string2Array.splice(string2Array.indexOf(element), 1);
+		}
+		else {
+			return false;
+		}
+	});
+	if (string2Array.length == 0) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+// Returns position in scrabbleDictionaryList if word is in dictionary, -1 otherwise
+function dictionary(word) {
+	return $.inArray(word, scrabbleDictionaryList);
+}
+
+function forEachIn(object, action) {
+  for (var property in object) {
+    if (object.hasOwnProperty(property))
+      action(property, object[property]);
+  };
+}
+
+function wordToString(word) {
+	var stringWord = "";
+	forEachIn(word, function(letter, count) {
+		for (var i = 0; i < count; i++) {
+			stringWord += letter;
+		};
+	});
+	return stringWord;
+}
+
+function clone(object) {
+  function OneShotConstructor(){}
+  OneShotConstructor.prototype = object;
+  return new OneShotConstructor();
+}
+
+Object.prototype.create = function() {
+  var object = clone(this);
+  if (typeof object.construct == "function")
+    object.construct.apply(object, arguments);
+  return object;
+};
+
+Object.prototype.extend = function(properties) {
+  var result = clone(this);
+  forEachIn(properties, function(name, value) {
+    result[name] = value;
+  });
+  return result;
+};
+
+function setNodeAttribute(node, attribute, value) {
+  if (attribute == "class")
+    node.className = value;
+  else if (attribute == "checked")
+    node.defaultChecked = value;
+  else if (attribute == "for")
+    node.htmlFor = value;
+  else if (attribute == "style")
+    node.style.cssText = value;
+  else
+    node.setAttribute(attribute, value);
+};
+
+function dom(name, attributes) {
+  var node = document.createElement(name);
+  if (attributes) {
+    forEachIn(attributes, function(name, value) {
+      setNodeAttribute(node, name, value);
+    });
+  }
+  for (var i = 2; i < arguments.length; i++) {
+    var child = arguments[i];
+    if (typeof child == "string")
+      child = document.createTextNode(child);
+    node.appendChild(child);
+  }
+  return node;
+};
+
+function removeElement(node) {
+  if (node.parentNode)
+    node.parentNode.removeChild(node);
+};
+
+function method(object, name) {
+  return function() {
+    return object[name].apply(object, arguments);
+  };
+}
+
+var Dictionary = {
+	construct: function(object) {
+		this.values = object || {};
+	},
+	store: function(letter, value) {
+		this.values[letter] = value;
+	},
+	lookup: function(letter) {
+		return this.values[letter];
+	},
+	contains: function(letter) {
+		return Object.prototype.hasOwnProperty.call(this.values, letter) &&
+		Object.prototype.propertyIsEnumerable.call(this.values, letter);
+	},
+	each: function(action) {
+		forEachIn(this.values, action);
+	},
+	remove: function(letter) {
+		if (this.contains(letter) == false || (this.lookup(letter) < 0))
+			throw "Doesn't contain letter";
+		else
+			this.store(letter, this.lookup(letter)-1);
+	},
+	createArray: function() {
+		var lettersArray = [];
+		this.each(function(letter, value) {
+			for (var i = 0; i < value; i++) {
+				lettersArray.push(letter);
+				}
+			});
+		return lettersArray;
+	}
+};
+
+var Bag = Dictionary.extend({
+	construct: function() {
+		this.values = LETTER_COUNTS;
+	},
+	selectRandomLetter: function() {
+		lettersArray = this.createArray();
+		return lettersArray[randomInteger(lettersArray.length)];
+	},
+	count: function() {
+		lettersArray = this.createArray();
+		return lettersArray.length;
+	}
+});
+
+var Hand = Dictionary.extend({
+	construct: function(bag, startValues) {
+		this.bag = bag;
+		this.values = startValues || {};
+		if (startValues == null)
+			this.initialHand();
+		var copy = this.createArray(),
+			tbody = dom("TBODY");
+			tableRow = dom("TR");
+		tbody.appendChild(tableRow);
+		for (var i = 0; i < HAND_SIZE; i++) {
+			if (copy[i]) {
+				if (copy[i] == " ")
+					var tableCell = dom("TD", {"id": String(i)}, "*");
+				else
+					var tableCell = dom("TD", {"id": String(i)}, copy[i]);
+				}
+			tableRow.appendChild(tableCell);
+		};
+		
+		this.table = dom("TABLE", {"id": "hand", "border": "1px"}, tbody);
+	},
+	isValidHand: function(word) {
+		copy = this.createArray();
+		for (var i = 0; i < word.length; i++) {
+			if (copy.indexOf(word[i]) == -1)
+				return false;
+			else
+				delete copy[copy.indexOf(word[i])];
+		};
+		return true;
+	},
+	grabLetter: function() {
+	if (this.bag.count() > 1) {
+		newLetter = this.bag.selectRandomLetter();
+		this.addLetter(newLetter);
+		this.bag.remove(newLetter);
+		return newLetter;
+	}
+	else
+		return null;
+	},
+	initialHand: function() {
+		for (var i = 0; i < HAND_SIZE; i++) {
+			var letter = this.bag.selectRandomLetter();
+			this.addLetter(letter);
+			this.bag.remove(letter);
+			}
+	},
+	removeLetter: function(letter) {
+		if (this.contains(letter) == false || (this.lookup(letter) < 0))
+			throw "Hand doesn't contain letter";
+		else
+			this.store(letter, this.lookup(letter)-1);
+	},
+	addLetter: function(letter) {
+		if (this.contains(letter) == false) 
+			this.store(letter, 1);
+		else
+			this.store(letter, this.lookup(letter)+1);
+	},
+	clear: function() {
+		this.values = {};
+	},
+	placeToPage: function(where) {
+		where.appendChild(this.table);
+	},
+	removeFromPage: function(where) {
+		removeElement(this.table);
+	}
+});
+
+/*
+var Square = {
+	construct: function(x, y) {
+		this.x = x;
+		this.y = y;
+		this.letter = "  ";
+		this.lock = false;
+		this.special = false;
+	},
+	isEmpty: function() {
+		return this.letter == "  ";
+	},
+	setLock: function() {
+		this.lock = true;
+	},
+	getLock: function() {
+		return this.lock;
+	},
+	setLetter: function(letter) {
+		this.letter = letter;
+	},
+	getLetter: function() {
+		return this.letter;
+	},
+	isSpecial: function() {
+		return this.special;
+	}
+};	
+*/
+	
+var Board = {
+	construct: function(width, height) {
+		this.width = width;
+		this.height = height;
+		var lock = true,
+			tbody = dom("TBODY");
+
+		this.board = [];
+		for (var y = 0; y < this.height; y++) {
+			var row = [],
+				tableRow = dom("TR");
+			for (var x = 0; x < this.width; x++) {
+				var tableSquare = dom("TD", {"id": String(x) + "-" + String(y), "class": boardSpecials[y][x]}, boardSpecialsText[y][x]);
+				tableRow.appendChild(tableSquare);
+				// row.push(Square.create(x, y));
+				row.push([lock, null]);
+			}
+			tbody.appendChild(tableRow);
+			this.board.push(row);
+		}
+		this.table = dom("TABLE", {"id": "board", "border": "1px"}, tbody);
+	},
+	valueAt: function(x, y) {
+		try {
+			return this.board[y][x][1];
+		}
+		catch (error) {
+			return null;
+		}
+	},
+	isEmpty: function(x, y) {
+		return this.valueAt(x, y) == null;
+	},
+	placeLetter: function(x, y, letter) {
+		if (this.isEmpty(x, y)) {
+			this.board[y][x][1] = letter;
+			this.setLock(x, y, false);
+		}
+	},
+	removeLetter: function(x, y) {
+		this.board[y][x][1] = null;
+	},
+	// Sets lock to boolean 'value'. 'true' if one can't move the space, such as in an empty space or a letter that has already been played. 'false' if one can move the letter such as in rearranging letters for a play
+	setLock: function(x, y, value) {
+		this.board[y][x][0] = value;
+	},
+	getLock: function(x, y) {
+		return this.board[y][x][0];
+	},
+	rowOrColumn: function(play) {
+		if (play.length < 2)
+			return "single";
+		if (play[0][0] == play[1][0])
+			return "column";
+		else if (play[0][1] == play[1][1])
+			return "row";
+		else
+			return false;
+	},
+	// Takes array of arrays in the form [x, y]. Are they all in a single row or column? Are all the values adjacent to each other? If so, returns true. Requires there are at least two tiles played.
+	isInline: function(play) {
+		var xValue = play[0][0],
+			yValue = play[0][1],
+			rowOrColumn = this.rowOrColumn(play);
+		if (rowOrColumn) {
+			for (var i = 1; i < play.length; i++) {
+				if (rowOrColumn == "column") {
+					// Checks if value is in the same row and if the y value is adjacent to the previous y value
+					if ((play[i][0] != xValue) || (play[i][1] != (play[i-1][1] + 1)))
+						return false;
+				}
+				else if (rowOrColumn == "row") {
+					if ((play[i][1] != yValue) || (play[i][0] != (play[i-1][0] + 1)))
+						return false;
+				}
+				else if (rowOrColumn == "single")
+					return true;
+			};
+		}
+		else
+			return false;
+		return true;
+	},
+	isInSameRowOrColumn: function(play) {
+		var xValue = play[0][0],
+			yValue = play[0][1],
+			xCheck = true,
+			yCheck = true;
+		for (var i = 1; i < play.length; i++) {
+			if (xValue != play[i][0])
+				xCheck = false;
+			if (yValue != play[i][1])
+				yCheck = false;
+		}
+		return (yCheck || xCheck);
+	},
+	// Scans board with play from findPlay plus the letters that are already on the board that the player is playing from
+	// Checks if letter is placed on board after the row of tiles that are represented by play. If so, places letter in play array. Runs itself again to check.
+	// findPlayPlus start with the first tile from findPlay. Then scan the board from that first tile to determine the next in line. If there's a next one, add it to playPlus. If not, break. These tiles for which it scans can be locked or unlocked.
+	// From each new sequence in the loop, check left or right if it's a column, up or down if it's a row, to determine a possible new word. Add all those possible new array words to returned object as optional attributes
+	// Determine whether play is row or column. If it's a row, run row functions. Once completed, run column functions to determine appendages. Keep track of column appendages in object.appendages.
+	findPlayPlus: function(play) {
+		var first = play[0],
+			row = [first],
+			column = [first],
+			playPlus = {row: null, column: null, appendages: []};
+		var rowAfter = this.rowAfterPlay(row);
+		while (rowAfter) {
+			row.push(rowAfter);
+			rowAfter = this.rowAfterPlay(row);
+		}
+		var rowBefore = this.rowBeforePlay(row);
+		while (rowBefore) {
+			row.unshift(rowBefore)
+			rowBefore = this.rowBeforePlay(row);
+		}
+		if ((row.length > 1) && (matches(row, play) > 1)) {
+			for (var i = 0; i < row.length; i++) {
+					var appendage = [row[i]];
+					if (matches(appendage, play) > 0) {
+						var columnAfter = this.columnAfterPlay(appendage);
+						while (columnAfter) {
+							appendage.push(columnAfter);
+							columnAfter = this.columnAfterPlay(appendage);
+						}
+						var columnBefore = this.columnBeforePlay(appendage);
+						while (columnBefore) {
+							appendage.unshift(columnBefore);
+							columnBefore = this.columnBeforePlay(appendage);
+						}
+						if (appendage.length > 1) {
+							playPlus.appendages.push(appendage);
+						}
+				}
+			}
+			playPlus.row = row;
+			return playPlus;
+		}
+		var columnAfter = this.columnAfterPlay(column);
+		while (columnAfter) {
+			column.push(columnAfter);
+			columnAfter = this.columnAfterPlay(column);
+		}
+		var columnBefore = this.columnBeforePlay(column);
+		while (columnBefore) {
+			column.unshift(columnBefore);
+			columnBefore = this.columnBeforePlay(column);
+		}
+		if ((column.length > 1) && (matches(column, play) > 1)) {
+			for (var i = 0; i < column.length; i++) {
+				var appendage = [column[i]];
+				if (matches(appendage, play) > 0) {
+					var rowAfter = this.rowAfterPlay(appendage);
+					while (rowAfter) {
+						appendage.push(rowAfter);
+						rowAfter = this.rowAfterPlay(appendage);
+					}
+					var rowBefore = this.rowBeforePlay(appendage);
+					while (rowBefore) {
+						appendage.unshift(rowBefore)
+						rowBefore = this.rowBeforePlay(appendage);
+					}
+					if (appendage.length > 1) {
+						playPlus.appendages.push(appendage);
+					}
+				}
+			}
+			playPlus.column = column;
+			return playPlus;
+		}
+		// If the play is only one letter
+		if (play.length == 1) {
+			if (row.length > 1)
+				playPlus.row = row;
+			if (column.length > 1 && playPlus.row == null)
+				playPlus.column = column;
+			if (column.length > 1 && playPlus.row != null)
+				playPlus.appendages.push(column);
+			return playPlus;
+		}
+		return play;
+	},
+	// TODO: How to pass function with arguments to object when we don't know function's name?
+	playPlusHandler: function(fn) {
+		var fn = this[fn](play);
+		while (fn) {
+			playPlus.push(fn);
+			fn = this[fn](play);
+		}
+	},
+	rowAfterPlay: function(play) {
+		var lastInRow = play[play.length-1];
+		if (this.valueAt(lastInRow[0]+1, lastInRow[1]))
+			return [lastInRow[0]+1, lastInRow[1]];
+		else
+			return null;
+	},
+	rowBeforePlay: function(play) {
+		var firstInRow = play[0];
+		if (this.valueAt(firstInRow[0]-1, firstInRow[1]))
+			return [firstInRow[0]-1, firstInRow[1]];
+		else
+			return null;
+	},
+	columnAfterPlay: function(play) {
+		var lastInColumn = play[play.length-1];
+		if (this.valueAt(lastInColumn[0], lastInColumn[1]+1))
+			return [lastInColumn[0], lastInColumn[1]+1];
+		else
+			return null;
+	},
+	columnBeforePlay: function(play) {
+		var firstInColumn = play[0];
+		if (this.valueAt(firstInColumn[0], firstInColumn[1]-1))
+			return [firstInColumn[0], firstInColumn[1]-1];
+		else
+			return null;
+	},
+	// Scans board for letters with a lock of false to determine the play
+	findPlay: function() {
+		var play = [];
+		for (var y = 0; y < this.height; y++) {
+			for (var x = 0; x < this.width; x++) {	
+				if (this.board[y][x][0] == false)
+					play.push([x, y]);
+			}
+		}
+		return play;
+	},	
+	// Sets play as permanent; i.e., 'locks' tiles on board
+	setPlay: function(play) {
+		for (var i = 0; i < play.length; i++) {
+			var x = play[i][0],
+				y = play[i][1];
+			this.setLock(x, y, true);
+			//this.board[y][x][0] = true;
+		}
+	},
+	// Given a playPlus object, count the number of unlocked tiles in that play given a Board
+	countUnlocked: function(playPlus) {
+		var count = 0;
+		if (playPlus.row) {
+			for (var i = 0; i < playPlus.row.length; i++) {
+				var x = playPlus.row[i][0],
+					y = playPlus.row[i][1];
+				if (this.getLock(x, y) == false)
+					count += 1;
+			}
+		}
+		if (playPlus.column) {
+			for (var i = 0; i < playPlus.column.length; i++) {
+				var x = playPlus.column[i][0],
+					y = playPlus.column[i][1];
+				if (this.getLock(x, y) == false)
+					count += 1;
+			}
+		}
+		return count;
+	},
+	// Creates array of square locations from playPlus object
+	playPlusArray: function(play) {
+		var playArray = [];
+		if (play.row) {
+			$.each(play.row, function(i, element) {
+				playArray.push(play.row[i]);
+			});
+		}
+		if (play.column) {
+			$.each(play.column, function(i, element) {
+				playArray.push(play.column[i]);
+			});
+		}
+		if (play.appendages) {
+			$.each(play.appendages, function(i, element) {
+				for (var j = 0; j < play.appendages[i].length; j++) {
+					playArray.push(play.appendages[i][j]);
+				}
+			});
+		}
+		return playArray;
+	},
+	// Takes play array (array of array locations) and returns score
+	scorePlay: function(play) {
+		var score = 0,
+			self = this,
+			TW = false,
+			DW = false;
+		$.each(play, function(i, element) {
+			var boardSpecial = boardSpecials[element[1]][element[0]];
+			if (boardSpecial == 'TW')
+				TW = true;
+			if (boardSpecial == 'DW' || boardSpecial == 'start')
+				DW = true;
+			if (boardSpecial == 'TL')
+				score += LETTER_VALUES[self.valueAt(element[0], element[1])]*3;
+			else if (boardSpecial == 'DL')
+				score += LETTER_VALUES[self.valueAt(element[0], element[1])]*2;
+			else
+				score += LETTER_VALUES[self.valueAt(element[0], element[1])];
+		});
+		if (TW)
+			score *= 3;
+		if (DW)
+			score *= 2;
+		return score;
+	},
+	// Takes playPlus object (column: array, row: array, appendages: array of arrays) returns score based on scorePlay
+	scorePlayPlus: function(playPlus) {
+		var score = 0,
+			self = this,
+			row = playPlus.row,
+			column = playPlus.column,
+			appendages = playPlus.appendages;
+		if (row) {
+			score += self.scorePlay(row);
+		}
+		if (column) {
+			score += self.scorePlay(column);
+		}
+		if (appendages == undefined) {
+			return score;
+		}
+		if (appendages.length > 0) {
+			$.each(appendages, function(i, element) {
+				score += self.scorePlay(appendages[i]);
+			});
+		}
+		if (self.findPlay().length == 7) {
+			score += 50;
+		}
+		return score;
+	},
+	scorePlayString: function(play) {
+		var score = "",
+			self = this,
+			TW = false,
+			DW = false;
+		$.each(play, function(i, element) {
+			var boardSpecial = boardSpecials[element[1]][element[0]];
+			if (boardSpecial == 'TW') {
+				TW = true;
+				score = "TRIPLE WORD SCORE\n".concat(score);
+			}
+			if (boardSpecial == 'DW' || boardSpecial == 'start') {
+				DW = true;
+				score = "DOUBLE WORD SCORE\n".concat(score);
+			}
+			if (boardSpecial == 'TL') {
+				score += self.valueAt(element[0], element[1]) + ": " + LETTER_VALUES[self.valueAt(element[0], element[1])] + "x3 = "
+				+ LETTER_VALUES[self.valueAt(element[0], element[1])]*3 + "\n";
+			}
+			else if (boardSpecial == 'DL') {
+				score += self.valueAt(element[0], element[1]) + ": " + LETTER_VALUES[self.valueAt(element[0], element[1])] + "x2 = "
+				+ LETTER_VALUES[self.valueAt(element[0], element[1])]*2 + "\n";
+			}
+			else {
+				score += self.valueAt(element[0], element[1]) + ": " + LETTER_VALUES[self.valueAt(element[0], element[1])] + "\n";
+			}
+		});
+		return score;
+	},
+	scorePlayPlusString: function(playPlus) {
+		var score = "",
+			self = this,
+			row = playPlus.row,
+			column = playPlus.column,
+			appendages = playPlus.appendages;
+		if (row) {
+			score += self.scorePlayString(row);
+		}
+		if (column) {
+			score += self.scorePlayString(column);
+		}
+		if (appendages.length > 0) {
+			$.each(appendages, function(i, element) {
+				score += "&&&&&&\n";
+				score += self.scorePlayString(element);
+			});
+		}
+		if (self.findPlay().length == 7) {
+			score += "PLUS 50 FOR 7 LETTER BINGO! BONUS";
+		}
+		return score;
+	},
+	// Disables board specials after a play is made on them by deleting the special from the boardSpecial array.
+	deactivateBoardSpecials: function(play) {
+		$.each(play, function(i, element) {
+			boardSpecials[element[1]][element[0]] = 'empty';
+		});
+	},
+	// Takes array of arrays in the form [x, y]. Return string from letters placed on board.
+	boardToWord: function(play) {
+		var word = "";
+		for (var i = 0; i < play.length; i++) {
+			var x = play[i][0],
+				y = play[i][1];
+			word += this.board[y][x][1];
+		}
+		return word;
+	},
+	each: function(func) {
+		for (var i = 0; i < this.height; i++) {
+			for (var j = 0; j < this.width; j++) {
+				var lock = this.board[i][j][0];
+				func(lock, this.valueAt(j, i));
+			}
+		}
+	},
+	placeToPage: function(where) {
+		where.appendChild(this.table);
+	},
+	removeFromPage: function(where) {
+		removeElement(this.table);
+	}
+};
+
+var Game = {
+	construct: function(place) {
+		this.bag = null;
+		this.hand = null;
+		this.board = null;
+		this.place = place;
+		this.score = 0;
+		this.letterEvent = null;
+		
+		$('<div id="header">C L A B B E R S <font size="3"> an anagram variant of Scrabble</font></div>').appendTo(this.place);
+		
+		this.initial();
+
+		$('<button id="newHand">Swap tiles</button>').appendTo(this.place);
+		$('#newHand').on('click', method(this, 'newHand'));
+		
+		$('<button id="returnTiles">Return tiles</button>').appendTo(this.place);
+		$('#returnTiles').on('click', method(this, 'returnTiles'));
+		
+		$('<button id="submitWord">Submit word</button>').appendTo(this.place);
+		$('#submitWord').on('click', method(this, 'submitWord'));
+
+		$('<p id="score">&nbsp;</p>').appendTo(this.place);
+		$('<p id="messages">&nbsp;</p>').appendTo(this.place);
+		$('<p id="scoreString">&nbsp;</p>').appendTo(this.place);
+		
+		var self = this;
+		
+		//children().children().children() means #hand table -> tbody -> tr -> td
+		//Hand click handlers
+		$('#hand').children().children().children().each(function() {
+			var $this = $(this);
+			$this.on('click', function() {
+				// Placing a letter back in hand
+				if (self.letterEvent && $this.text() == "  ") {
+					$this.text(self.letterEvent[0]);
+					$this.removeClass("empty").removeClass("empty-hand");
+					
+					$id = $('#' + self.letterEvent[1])
+					var square = $id.attr('id');
+					$id.removeClass("selected-letter")
+						.text("  ");
+					// Determining whether letter was grabbed from board
+					if (self.letterEvent[1].length >= 2) {
+						square = square.split("-");
+						self.hand.addLetter(self.letterEvent[0]);
+						self.board.removeLetter(square[0], square[1]);
+						self.board.setLock(square[0], square[1], true);
+						$id.addClass('empty')
+							.removeClass('placed-letter')
+							.text(boardSpecialsText[square[0]][square[1]]);
+					}
+					else {
+						$id.addClass('empty-hand')
+							.text('  ');
+					}
+					self.letterEvent = null;
+				}
+				// Grabbing letter from hand
+				else if (!self.letterEvent && $this.text() != "  ") {
+					$this.addClass("selected-letter");
+					self.letterEvent = [$this.text(), $this.attr("id")];
+				}
+				else if (self.letterEvent && $this.hasClass('selected-letter')) {
+					self.deselectHandler(self.letterEvent);
+					self.letterEvent = null;
+				}
+				else if (self.letterEvent && !($this.hasClass('selected-letter') || $this.hasClass('empty'))) {
+					self.deselectHandler(self.letterEvent);
+					$this.addClass("selected-letter");
+					self.letterEvent = [$this.text(), $this.attr("id")];
+				}
+			});
+		});
+		
+		//children().children().children() means #board table -> tbody -> tr -> td
+		//Board click handlers
+		$('#board').children().children().children().each(function() {
+			var $this = $(this);
+			$this.on('click', function() {
+				var square = $this.attr("id"),
+					square = square.split("-");
+				// Place letter on board
+				if ((self.letterEvent) && (self.board.isEmpty(square[0], square[1]))) {
+					self.board.placeLetter(square[0], square[1], self.letterEvent[0]);
+					$('#' + String(square[0]) + "-" + String(square[1])).text(self.letterEvent[0])
+																	.removeClass('empty')
+																	.addClass('placed-letter');
+					
+					$id = $('#' + self.letterEvent[1])
+					square = $id.attr('id');
+					$id.removeClass("selected-letter");
+					if (self.letterEvent[1].length < 2) {
+						self.hand.removeLetter($id.text());
+						$id.addClass('empty-hand')
+							.text('  ');
+					}
+					else {
+						square = square.split("-");
+						self.board.removeLetter(square[0], square[1]);
+						self.board.setLock(square[0], square[1], true);
+						$id.addClass('empty')
+							.removeClass('placed-letter');
+					}
+					$id.text("  ")
+						.text(boardSpecialsText[square[0]][square[1]]);
+					self.letterEvent = null;
+				}
+				// Grab letter from board
+				else if ((!self.letterEvent) && (self.board.getLock(square[0], square[1]) == false)) {
+					self.letterEvent = [$this.text(), $this.attr("id")];
+					$this.addClass("selected-letter");
+				}
+				else if (self.letterEvent && $this.hasClass('selected-letter')) {
+					self.deselectHandler(self.letterEvent);
+					self.letterEvent = null;
+				}				
+				else if (self.letterEvent && !($this.hasClass('selected-letter') || $this.hasClass('empty') || self.board.getLock(square[0], square[1]))) {
+					self.deselectHandler(self.letterEvent);
+					$this.addClass("selected-letter");
+					self.letterEvent = [$this.text(), $this.attr("id")];
+				}
+			});
+		});
+	},
+	deselectHandler: function(letterEvent) {
+		var $id = $('#' + letterEvent[1]);
+		$id.removeClass("selected-letter");
+	},
+	initial: function() {
+		if (this.board && this.hand) {
+			this.board.removeFromPage(this.place);
+			this.hand.removeFromPage(this.place);
+		}
+		this.score = 0;
+		this.first = true;
+		this.board = Board.create(BOARD_WIDTH, BOARD_HEIGHT);
+		this.board.placeToPage(this.place);
+		this.bag = Bag.create();
+		this.hand = Hand.create(this.bag, null);
+		this.hand.placeToPage(this.place);
+	},
+	submitWord: function() {
+		var play = this.board.findPlay(),
+			countPlay = play.length,
+			playPlus = this.board.findPlayPlus(play),
+			playPlusArray = this.board.playPlusArray(playPlus),
+			score = this.board.scorePlayPlus(playPlus),
+			countUnlockedPlayPlus = this.board.countUnlocked(playPlus),
+			row = playPlus.row,
+			column = playPlus.column,
+			appendages = playPlus.appendages,
+			self = this,
+			blank = false,
+			checkForOneLetter = true;
+		if (row)
+			countPlayPlusRow = playPlus.row.length;
+		if (column)
+			countPlayPlusColumn = playPlus.column.length;
+		var submitWordHelper = function(rowOrColumn) {
+			// Check if play includes at least one letter already placed on board
+			if (rowOrColumn == row)
+				var countPlayPlus = countPlayPlusRow;
+			if (rowOrColumn == column)
+				var countPlayPlus = countPlayPlusColumn;
+			if (countPlayPlus == countPlay && self.first == false && playPlus.appendages.length < 1) {
+					checkForOneLetter = false;
+			}
+			var word = self.board.boardToWord(rowOrColumn),
+				scoreString = "Play score: " + score + "\n\n";
+			scoreString += self.board.scorePlayPlusString(playPlus);
+			if (word.indexOf("*") != -1) {
+				var blankLetter = prompt("Enter letter for blank (*) tile");
+				blank = true;
+				}
+			if (blank && blankLetter) {
+				// Replace * with letter chosen
+				blank = false;
+				blankLetter = blankLetter.toUpperCase().slice(0,1);
+				$('#board').children().children().children().each( function() {
+					var square = $(this).attr("id"),
+						square = square.split("-");
+					if (self.board.valueAt(square[0], square[1]) == "*") {
+						self.board.removeLetter(square[0], square[1]);
+						self.board.placeLetter(square[0], square[1], blankLetter);
+						$('#' + square[0] + '-' + square[1]).text(blankLetter);
+					}
+				});
+				word = self.board.boardToWord(rowOrColumn);
+			}
+			
+			var playPlusAppendages = function(playPlus) {
+				var appendageWords = [],
+					appendages = playPlus.appendages;
+				if (appendages.length > 0) {
+					$.each(appendages, function( i, element ) {
+						appendageWords.push(self.board.boardToWord(element));
+					});
+				}
+				return appendageWords;
+			}
+			
+			var anagramsCheck = true;
+			var validWordCheck = false;
+			if (anagramsOn) {
+				var wordList = playPlusAppendages(playPlus);
+				wordList.unshift(word);
+				var anagramWords = [];
+				anagramsCheck = false;
+				$.each(wordList, function( i, element ) {
+					var anagramWord = prompt("Enter your intended dictionary word for the anagram " + String(element) + ": "); 
+					if (typeof(anagramWord) == "string") {
+						anagramWord = anagramWord.toUpperCase();
+						anagramWords.push( anagramWord );
+					}
+				});
+				
+				var validAnagrams = function( anagramWords ) {
+					var check = true;
+					if (anagramWords.length < 1) {
+						check = false;
+					}
+					$.each(anagramWords, function( i, element ) {
+						if ((anagram( wordList[i], element )) == false) {
+							check = false;
+						}
+					});
+					return check;
+				}
+				
+				var validWord = function(anagramWords) {
+					var check = true;
+					$.each(anagramWords, function( i, element ) {
+						var elementLowerCase = element.toLowerCase();
+						if (dictionary(elementLowerCase) == -1) {
+							check = false;
+						}
+					});
+					return check;
+				}
+				
+				if (validAnagrams(anagramWords) == true) {
+					anagramsCheck = true;
+				}
+				if (validWord(anagramWords) == true) {
+					validWordCheck = true;
+				}
+			
+			}			
+			
+			var checkStart = function ( playPlusArray ) {
+				var check = false;
+				$.each( playPlusArray, function ( i, element ) {
+					if (equalArrayOfLengthTwo( element, [7,7] )) {
+						check = true;
+					}
+				});
+				return check;
+			}
+			
+			var start = true;
+			if (self.first) {
+				if (checkStart( playPlusArray ) == false) {
+					start = false;
+				}
+			}
+			
+			if (self.board.isInline(rowOrColumn) && checkForOneLetter && self.board.isInSameRowOrColumn(play) && countPlay <= countUnlockedPlayPlus && !(word.indexOf("*") != -1) && anagramsCheck && validWordCheck && start) {
+				self.letterEvent = null;
+				self.replenishHand(countPlay);
+				self.setPlayStyle(play);
+				self.first = false;
+			
+				self.updateScore(score);
+				var message = "Valid play: 	" + word,
+					playPlusAppendagesArray = playPlusAppendages(playPlus);				
+				if (playPlusAppendagesArray.length > 0)
+					message += ", " + playPlusAppendagesArray.join(", ");
+				
+				message += " - " + anagramWords.join(", ");
+				
+				$('#messages').text(message)
+					.removeClass('error');
+				var sString = $('#scoreString').text(scoreString)
+					.addClass('text-border');
+				sString.html(sString.html().replace(/\n/g,'<br/>'));
+				self.board.deactivateBoardSpecials(playPlusArray);
+				self.board.setPlay(play);
+			}
+			else {
+				var errorText = "Invalid play. ";
+				if (checkForOneLetter == false) {
+					errorText += "Your play must be connected to a previously played letter and in a consecutive line. ";
+				}
+				if (self.board.isInline(rowOrColumn) == false) { 
+					errorText += "Tiles must be played in a consecutive straight line. ";
+				}
+				if (anagramsCheck == false) {
+					errorText += "The word you entered wasn't an anagram of the word on the board. ";
+				}
+				if (start == false) {
+					errorText += "First play must include the starting square ST ";
+				}
+				if (validWordCheck == false) {
+					errorText += "The word you typed is not in the dictionary. ";
+				}
+				
+				$('#messages').text(errorText)
+								.addClass('error');
+				$('#scoreString').text("")
+									.removeClass('text-border');
+			}
+		}
+		if (row)
+			submitWordHelper(row);
+		else if (column)
+			submitWordHelper(column);
+	},
+	newHand: function() {
+		if (this.board && this.hand && (this.bag.count() >= HAND_SIZE) && (this.board.findPlay().length < 1)) {
+			this.hand = Hand.create(this.bag, null);
+			var hand = this.hand.createArray();
+			for (var i = 0; i < HAND_SIZE; i++) {
+				$square = $('#' + i)
+							.removeClass('selected-letter')
+							.text(hand[i]);
+			}
+		}
+		else if (this.bag.count() < HAND_SIZE)
+			$('#messages').text("Bag out of letters").addClass('error');
+		else if (this.board.findPlay().length >= 1)
+			$('#messages').text("To swap tiles, all tiles must be returned to hand").addClass('error');
+	},
+	returnTiles: function() {
+		var self = this;
+		var play = this.board.findPlay();
+		for (var i = 0; i < play.length; i++) {
+			var letter = this.board.valueAt(play[i][0], play[i][1]);
+			this.board.removeLetter(play[i][0], play[i][1]);
+			var boardSpecialsTxt = boardSpecialsText[play[i][0]][play[i][1]],
+				boardSpecialsClass = String(boardSpecials[play[i][0]][play[i][1]]),
+				$square = $('#' + play[i][0] + "-" + play[i][1])
+							.text(boardSpecialsTxt)
+							.addClass(boardSpecialsClass)
+							.removeClass('placed-letter')
+							.removeClass('selected-letter');
+			self.letterEvent = null;
+			this.board.setLock(play[i][0], play[i][1]);
+			this.hand.addLetter(letter);
+			$('.empty-hand')
+				.first()
+				.text(letter)
+				.removeClass('empty-hand');
+		}
+		//this.setPlayStyle(play);
+	},	
+	replenishHand: function(count) {
+		for (var i = 0; i < count; i++) {
+			var letter = this.hand.grabLetter();
+			if (!letter) {
+				$('#messages').text("Bag out of letters");
+			}
+			$('.empty-hand')
+				.first()
+				.text(letter)
+				.removeClass('empty-hand');
+		}
+	},
+	// Removes styling for letters placed on board during play
+	setPlayStyle: function(play) {
+		for (var i = 0; i < play.length; i++) {
+			var x = play[i][0],
+				y = play[i][1];
+			$('#' + x + "-" + y).removeClass('placed-letter selected-letter TW DW TL DL start')
+								.addClass('played-letter');
+		}
+	},
+	updateScore: function(newPoints) {
+		this.score += newPoints;
+		$('#score').text("Total score: " + this.score);
+	}
+};
+
+function isInlineTests() {
+	var testBoard = Board.create(5, 5);
+	return (testBoard.isInline([[1,2], [1,3], [1, 4]]) == true) &&
+			(testBoard.isInline([[0, 2], [1, 2], [2, 2]]) == true) &&
+			(testBoard.isInline([[0, 3], [0, 4], [0, 1]]) == false) &&
+			(testBoard.isInline([[0, 1], [1, 2]]) == false) &&
+			(testBoard.isInline([[0, 1], [0, 2], [0, 3], [0, 0]]) == false) &&
+			(testBoard.isInline([[0, 0], [1, 1]]) == false) &&
+			(testBoard.isInline([[0, 1], [1, 0]]) == false);
+}
+function rowOrColumnTests() {
+	var testBoard = Board.create(5, 5);
+	return testBoard.rowOrColumn([[0, 2], [1, 2], [2, 2]]) == "row" &&
+			(testBoard.rowOrColumn([[1, 2], [1, 3], [1, 4]]) == "column") &&
+			(testBoard.rowOrColumn([[0, 3], [0, 4], [0, 1]]) == "column") &&
+			(testBoard.rowOrColumn([[0, 1], [1, 2]]) == false) &&
+			(testBoard.rowOrColumn([[0, 1], [1, 0]]) == false) &&
+			(testBoard.rowOrColumn([[0, 1]]) == "single");
+}
+function isValidHandTests(testBag) {
+	var testHand = Hand.create(testBag, {"B": 1, "A": 2, "Y": 1});
+	return testHand.isValidHand("BABY") == false &&
+		testHand.isValidHand("BAY") ==  true &&
+		testHand.isValidHand("BY") == true &&
+		testHand.isValidHand("XBY") == false &&
+		testHand.isValidHand("BAAY") == true;
+}
+
+console.log("rowOrColumn tests: " + rowOrColumnTests());
+console.log("isInline tests: " + isInlineTests());
+var testBag = Bag.create();
+console.log("isValidHand tests: " + isValidHandTests(testBag));
+
+var scrabble = Game.create(document.body);
+
+});
+</script>
+</body>
+</html>

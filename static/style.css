@@ -1,0 +1,113 @@
+body {
+	font-family: sans-serif;
+	font-size: 1em;
+	margin: 0 5%;
+}
+#header {
+	clear: right;
+	height: 1em;
+	padding: 1em 1em 2em 0em;
+	width: 100%;
+	font-size: 2em;
+}
+table {
+	table-layout: fixed;
+}
+#board {
+	float: left;
+	margin: 0 4em 2em 0;
+}
+#board td{
+	font-size: 10px;
+	color: grey;
+	width: 30px;
+	height: 30px;
+	text-align: center;
+}
+#hand {
+	position: relative;	
+	margin: 0em 0em 1.2em 0em;
+	width: 270px;
+}
+#hand td{
+	text-align: center;
+	font-size: 20px;
+	width: 30px;
+	height: 30px;
+}
+#hand td.empty-hand {
+	background-color: white;
+}
+#score {
+	margin: 1.8em 0 1em 0;
+	font-weight: bold;
+}
+#messages {
+	margin: 1em 1em 1.2em 0;
+	font-weight: bold;
+	font-size: 25px;
+}
+p.error {
+	color: red;
+}
+#scoreString {
+	margin: 0 1em 1em 0;
+	font-weight: bold;
+}
+button {
+	margin: 0.2em 0.3em 0.2em 0;
+	font-size: 15px;
+	border-radius: 0;
+	border: 0.1em solid grey;
+}
+.empty {
+	background-color: white;
+}
+.TW {
+	background-color: #BC8F8F;
+}
+.DW {
+	background-color: #CFAFAF;
+}
+.TL {
+	background-color: #E2CFCF;
+}
+.DL {
+	background-color: #F5EFEF;
+}
+.start {
+	background-color: pink;
+}
+.text-border {
+	padding: 1em;
+	border-width: 1px;
+	border-style: solid;
+	display: inline;
+	float: left;
+	text-align: right;
+}
+#board td.placed-letter {
+	font-size: 20px;
+	background-color: green;
+	color: white;
+}
+#board td:hover {
+	background-color: orange;	
+	color: black;
+}
+#hand td:hover {
+	background-color: orange;	
+}
+#hand td.selected-letter {
+	background-color: red;
+}
+#board td.selected-letter {
+	background-color: red;
+	font-size: 20px;
+	color: black;
+}
+#board td.played-letter {
+	font-size: 20px;
+	background-color: grey;
+	color: white;
+}
