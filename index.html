@@ -42,10 +42,11 @@ Fatal error sometimes after hitting swap tiles??
 <body>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" ></script>
-<script src="static/ospd.js"></script>
 <script type="text/javascript">
 
-$(document).ready(function() {
+$(document).ready(function () {
+
+$.getScript("static/ospd.js");
 
 var HAND_SIZE = 7,
 BOARD_HEIGHT = 15,
