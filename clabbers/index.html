@@ -3,17 +3,7 @@
 <html> 
 <!-- 
 
-change
-
-larger margins
-disable text highlighting
-make error msg wrap
-
 clabbers scrabble switch
-
-test
-
-add stuff to DOM only once
 
 Clean up unneeded functions
 Refactor
@@ -21,12 +11,9 @@ Refactor
 How to call function as argument?
 Re-write findPlayPlus using function handler
 
-lookup: Handlebars tutorial
-Place Board and Hand using Handlebars templates
-
 Re-write filtering functions findPlay, etc. using Jquery.grep
 
-How do we access the empty Square objects we create when we create a Board? How do we define multiple variables within a loop? eval? Should we even use a Square object or just add the traits we need to the array?
+Square objects?
 
 bug reporting e-mail
 
@@ -45,11 +32,12 @@ Fatal error sometimes after hitting swap tiles??
 <body>
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" ></script>
+<script src="static/ospd.js" ></script>
 <script type="text/javascript">
 
 $(document).ready(function () {
 
-$.getScript("static/ospd.js");
+//$.getScript("static/ospd.js");
 
 var HAND_SIZE = 7,
 BOARD_HEIGHT = 15,
@@ -58,10 +46,6 @@ BOARD_WIDTH = 15,
 LETTER_VALUES = {"A": 1, "B": 3, "C": 3, "D": 2, "E": 1, "F": 4, "G": 2, "H": 4, "I": 1, "J": 8, "K": 5, "L": 1, "M": 3, "N": 1, "O": 1, "P": 3, "Q": 10, "R": 1, "S": 1, "T": 1, "U": 1, "V": 4, "W": 4, "X": 8, "Y": 4, "Z": 10, "*": 0},
 
 LETTER_COUNTS = {"A": 9, "B": 2, "C": 2, "D": 4, "E": 12, "F": 2, "G": 3, "H": 2, "I": 9, "J": 1, "K": 1, "L": 4, "M": 2, "N": 6, "O": 8, "P": 2, "Q": 1, "R": 6, "S": 4, "T": 6, "U": 4, "V": 2, "W": 2, "X": 1, "Y": 2, "Z": 1, "*": 2},
-
-LETTER_VOWELS = ["A", "E", "I", "O", "U"],
-
-anagramsOn = true,
 
 boardSpecialsText = [
 	['TW', '   ', '   ', 'DL', '   ', '   ', '   ', 'TW', '   ', '   ', '   ', 'DL', '   ', '   ', 'TW'],
@@ -80,6 +64,7 @@ boardSpecialsText = [
 	['   ', 'DW', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'DW', '   '],
 	['TW', '   ', '   ', 'DL', '   ', '   ', '   ', 'TW', '   ', '   ', '   ', 'DL', '   ', '   ', 'TW']
 ],
+
 boardSpecials = [
 	['TW', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'TW', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'TW'],
 	['empty', 'DW', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'DW', 'empty'],
@@ -97,6 +82,7 @@ boardSpecials = [
 	['empty', 'DW', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'DW', 'empty'],
 	['TW', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'TW', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'TW']
 ],
+
 boardSpecialsCheck = function () {
 	for (var i = 0; i < boardSpecials.length; i++) {
 		if (boardSpecials[i].length != BOARD_WIDTH)
@@ -120,60 +106,11 @@ function matches(array1, array2) {
 	return count;
 }
 
-function equalArrayOfLengthTwo(a, b) {
-	return a[0] == b[0] && a[1] == b[1];
-}
-
-function randomInteger(below) {
-	return Math.floor(Math.random() * below);
-}
-
-// Is string1 an anagram of string2?
-function anagram(string1, string2) {
-	var string1Array = [],
-		string2Array = [];
-	for (var i = 0; i < string1.length; i++) {
-		string1Array.push(string1[i]);
-	}
-	for (var i = 0; i < string2.length; i++) {
-		string2Array.push(string2[i]);
-	}
-	$.each(string1Array, function(i, element) {
-		if (string2Array.indexOf(element) != -1) {
-			string2Array.splice(string2Array.indexOf(element), 1);
-		}
-		else {
-			return false;
-		}
-	});
-	if (string2Array.length == 0) {
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-
-// Returns position in scrabbleDictionaryList if word is in dictionary, -1 otherwise
-function dictionary(word) {
-	return $.inArray(word, scrabbleDictionaryList);
-}
-
 function forEachIn(object, action) {
   for (var property in object) {
     if (object.hasOwnProperty(property))
       action(property, object[property]);
   };
-}
-
-function wordToString(word) {
-	var stringWord = "";
-	forEachIn(word, function(letter, count) {
-		for (var i = 0; i < count; i++) {
-			stringWord += letter;
-		};
-	});
-	return stringWord;
 }
 
 function clone(object) {
@@ -226,11 +163,6 @@ function dom(name, attributes) {
   return node;
 };
 
-function removeElement(node) {
-  if (node.parentNode)
-    node.parentNode.removeChild(node);
-};
-
 function method(object, name) {
   return function() {
     return object[name].apply(object, arguments);
@@ -277,7 +209,8 @@ var Bag = Dictionary.extend({
 	},
 	selectRandomLetter: function() {
 		lettersArray = this.createArray();
-		return lettersArray[randomInteger(lettersArray.length)];
+		// Selects random element from lettersArray
+		return lettersArray[Math.floor(Math.random() * lettersArray.length)];
 	},
 	count: function() {
 		lettersArray = this.createArray();
@@ -351,9 +284,6 @@ var Hand = Dictionary.extend({
 	},
 	placeToPage: function(where) {
 		where.appendChild(this.table);
-	},
-	removeFromPage: function(where) {
-		removeElement(this.table);
 	}
 });
 
@@ -401,7 +331,6 @@ var Board = {
 			for (var x = 0; x < this.width; x++) {
 				var tableSquare = dom("TD", {"id": String(x) + "-" + String(y), "class": boardSpecials[y][x]}, boardSpecialsText[y][x]);
 				tableRow.appendChild(tableSquare);
-				// row.push(Square.create(x, y));
 				row.push([lock, null]);
 			}
 			tbody.appendChild(tableRow);
@@ -714,7 +643,7 @@ var Board = {
 				score += self.scorePlay(appendages[i]);
 			});
 		}
-		if (self.findPlay().length == 7) {
+		if (self.findPlay().length == HAND_SIZE) {
 			score += 50;
 		}
 		return score;
@@ -797,9 +726,6 @@ var Board = {
 	},
 	placeToPage: function(where) {
 		where.appendChild(this.table);
-	},
-	removeFromPage: function(where) {
-		removeElement(this.table);
 	}
 };
 
@@ -816,17 +742,17 @@ var Game = {
 		
 		this.initial();
 
-		$('<button id="newHand">Swap tiles</button>').appendTo(this.place);
+		$('<button id="newHand">Swap Tiles</button>').appendTo(this.place);
 		$('#newHand').on('click', method(this, 'newHand'));
 		
-		$('<button id="returnTiles">Return tiles</button>').appendTo(this.place);
+		$('<button id="returnTiles">Return Tiles</button>').appendTo(this.place);
 		$('#returnTiles').on('click', method(this, 'returnTiles'));
 		
-		$('<button id="submitWord">Submit word</button>').appendTo(this.place);
+		$('<button id="submitWord">Submit Word</button>').appendTo(this.place);
 		$('#submitWord').on('click', method(this, 'submitWord'));
 
 		$('<p id="score">&nbsp;</p>').appendTo(this.place);
-		$('<p id="messages">&nbsp;</p>').appendTo(this.place);
+		$('<p id="messages">Clabbers is like Scrabble, but you can play anagrams of real words. Place a word or an anagram of a word on the board. Then click Submit Word and type in the dictionary word of the anagram you placed.</p>').appendTo(this.place);
 		$('<p id="scoreString">&nbsp;</p>').appendTo(this.place);
 		
 		var self = this;
@@ -933,10 +859,6 @@ var Game = {
 		$id.removeClass("selected-letter");
 	},
 	initial: function() {
-		if (this.board && this.hand) {
-			this.board.removeFromPage(this.place);
-			this.hand.removeFromPage(this.place);
-		}
 		this.score = 0;
 		this.first = true;
 		this.board = Board.create(BOARD_WIDTH, BOARD_HEIGHT);
@@ -1007,62 +929,91 @@ var Game = {
 			
 			var anagramsCheck = true;
 			var validWordCheck = false;
-			if (anagramsOn) {
-				var wordList = playPlusAppendages(playPlus);
-				wordList.unshift(word);
-				var anagramWords = [];
-				anagramsCheck = false;
-				$.each(wordList, function( i, element ) {
-					var anagramWord = prompt("Enter your intended dictionary word for the anagram " + String(element) + ": "); 
-					if (typeof(anagramWord) == "string") {
-						anagramWord = anagramWord.toUpperCase();
-						anagramWords.push( anagramWord );
+			var wordList = playPlusAppendages(playPlus);
+			wordList.unshift(word);
+			var anagramWords = [];
+			anagramsCheck = false;
+			$.each(wordList, function( i, element ) {
+				var anagramWord = prompt("Enter your intended dictionary word for the anagram " + String(element) + ": "); 
+				if (typeof(anagramWord) == "string") {
+					anagramWord = anagramWord.toUpperCase();
+					anagramWords.push( anagramWord );
+				}
+			});
+			
+			// Is string1 an anagram of string2?
+			var anagram = function(string1, string2) {
+				var string1Array = [],
+					string2Array = [];
+				for (var i = 0; i < string1.length; i++) {
+					string1Array.push(string1[i]);
+				}
+				for (var i = 0; i < string2.length; i++) {
+					string2Array.push(string2[i]);
+				}
+				$.each(string1Array, function(i, element) {
+					if (string2Array.indexOf(element) != -1) {
+						string2Array.splice(string2Array.indexOf(element), 1);
+					}
+					else {
+						return false;
 					}
 				});
-				
-				var validAnagrams = function( anagramWords ) {
-					var check = true;
-					if (anagramWords.length < 1) {
+				if (string2Array.length == 0) {
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+			
+			var validAnagrams = function( anagramWords ) {
+				var check = true;
+				if (anagramWords.length < 1) {
+					check = false;
+				}
+				$.each(anagramWords, function( i, element ) {
+					if ((anagram( wordList[i], element )) == false) {
 						check = false;
 					}
-					$.each(anagramWords, function( i, element ) {
-						if ((anagram( wordList[i], element )) == false) {
-							check = false;
-						}
-					});
-					return check;
-				}
-				
-				var validWord = function(anagramWords) {
-					var check = true;
-					$.each(anagramWords, function( i, element ) {
-						var elementLowerCase = element.toLowerCase();
-						if (dictionary(elementLowerCase) == -1) {
-							check = false;
-						}
-					});
-					return check;
-				}
-				
-				if (validAnagrams(anagramWords) == true) {
-					anagramsCheck = true;
-				}
-				if (validWord(anagramWords) == true) {
-					validWordCheck = true;
-				}
+				});
+				return check;
+			}
 			
+			// Checks if each word played is in the dictionary
+			var validWord = function(anagramWords) {
+				var check = true;
+				$.each(anagramWords, function( i, element ) {
+					var elementLowerCase = element.toLowerCase();
+					// Scans dictionary array for the string elementLowerCase
+					if ($.inArray(elementLowerCase, scrabbleDictionaryArray) == -1) {
+						check = false;
+					}
+				});
+				return check;
+			}
+			
+			if (validAnagrams(anagramWords) == true) {
+				anagramsCheck = true;
+			}
+			if (validWord(anagramWords) == true) {
+				validWordCheck = true;
 			}			
 			
+			// Checks if first play is on the Start square
 			var checkStart = function ( playPlusArray ) {
 				var check = false;
+				var boardSizeArray = [Math.floor(BOARD_HEIGHT/2), Math.floor(BOARD_WIDTH/2)];
+				// Checks if at least one square is on the Start square
 				$.each( playPlusArray, function ( i, element ) {
-					if (equalArrayOfLengthTwo( element, [7,7] )) {
+					if (element[0] == boardSizeArray[0] && element[1] == boardSizeArray[1]) {
 						check = true;
 					}
 				});
 				return check;
 			}
 			
+			// Allows plays that are not the first to skip the checkStart function
 			var start = true;
 			if (self.first) {
 				if (checkStart( playPlusArray ) == false) {
@@ -1104,7 +1055,7 @@ var Game = {
 					errorText += "The word you entered wasn't an anagram of the word on the board. ";
 				}
 				if (start == false) {
-					errorText += "First play must include the starting square ST ";
+					errorText += "The first play must include the starting square ST. ";
 				}
 				if (validWordCheck == false) {
 					errorText += "The word you typed is not in the dictionary. ";
@@ -1147,8 +1098,7 @@ var Game = {
 				$square = $('#' + play[i][0] + "-" + play[i][1])
 							.text(boardSpecialsTxt)
 							.addClass(boardSpecialsClass)
-							.removeClass('placed-letter')
-							.removeClass('selected-letter');
+							.removeClass('placed-letter selected-letter');
 			self.letterEvent = null;
 			this.board.setLock(play[i][0], play[i][1]);
 			this.hand.addLetter(letter);
