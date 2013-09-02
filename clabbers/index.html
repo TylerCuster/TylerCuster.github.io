@@ -3,24 +3,17 @@
 <html> 
 <!-- 
 
-clabbers scrabble switch
-
-Clean up unneeded functions
-Refactor
-
-How to call function as argument?
 Re-write findPlayPlus using function handler
 
 Re-write filtering functions findPlay, etc. using Jquery.grep
 
-Square objects?
+Square objects
 
 bug reporting e-mail
 
 BUGS:
 TypeError when submitWord is called with no letters played on board
 Non-fatal error when placing two tiles not touching each other
-Fatal error sometimes after hitting swap tiles??
  -->
  
 <head>
@@ -37,6 +30,7 @@ Fatal error sometimes after hitting swap tiles??
 
 $(document).ready(function () {
 
+//In production, grab dictionary after page loads
 //$.getScript("static/ospd.js");
 
 var HAND_SIZE = 7,
@@ -81,18 +75,7 @@ boardSpecials = [
 	['empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'DL', 'empty', 'DL', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty'],
 	['empty', 'DW', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'DW', 'empty'],
 	['TW', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'TW', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'TW']
-],
-
-boardSpecialsCheck = function () {
-	for (var i = 0; i < boardSpecials.length; i++) {
-		if (boardSpecials[i].length != BOARD_WIDTH)
-			return false;
-	}
-	if (boardSpecials.length != BOARD_HEIGHT)
-		return false;
-	return true;
-};
-console.log('boardSpecialsCheck: ' + boardSpecialsCheck());
+]
 
 // How many identical values between array1 and array2 where array1 and array2 are composed of arrays of length two
 function matches(array1, array2) {
@@ -106,6 +89,7 @@ function matches(array1, array2) {
 	return count;
 }
 
+// Credit: Marijn Haverbeke in Eloquent JavaScript
 function forEachIn(object, action) {
   for (var property in object) {
     if (object.hasOwnProperty(property))
@@ -113,12 +97,14 @@ function forEachIn(object, action) {
   };
 }
 
+// Credit: Marijn Haverbeke in Eloquent JavaScript
 function clone(object) {
   function OneShotConstructor(){}
   OneShotConstructor.prototype = object;
   return new OneShotConstructor();
 }
 
+// Credit: Marijn Haverbeke in Eloquent JavaScript
 Object.prototype.create = function() {
   var object = clone(this);
   if (typeof object.construct == "function")
@@ -126,6 +112,7 @@ Object.prototype.create = function() {
   return object;
 };
 
+// Credit: Marijn Haverbeke in Eloquent JavaScript
 Object.prototype.extend = function(properties) {
   var result = clone(this);
   forEachIn(properties, function(name, value) {
@@ -134,6 +121,7 @@ Object.prototype.extend = function(properties) {
   return result;
 };
 
+// Credit: Marijn Haverbeke in Eloquent JavaScript
 function setNodeAttribute(node, attribute, value) {
   if (attribute == "class")
     node.className = value;
@@ -147,6 +135,7 @@ function setNodeAttribute(node, attribute, value) {
     node.setAttribute(attribute, value);
 };
 
+// Credit: Marijn Haverbeke in Eloquent JavaScript
 function dom(name, attributes) {
   var node = document.createElement(name);
   if (attributes) {
@@ -163,6 +152,7 @@ function dom(name, attributes) {
   return node;
 };
 
+// Credit: Marijn Haverbeke in Eloquent JavaScript
 function method(object, name) {
   return function() {
     return object[name].apply(object, arguments);
@@ -179,6 +169,7 @@ var Dictionary = {
 	lookup: function(letter) {
 		return this.values[letter];
 	},
+	// Credit: Marijn Haverbeke in Eloquent JavaScript
 	contains: function(letter) {
 		return Object.prototype.hasOwnProperty.call(this.values, letter) &&
 		Object.prototype.propertyIsEnumerable.call(this.values, letter);
@@ -752,12 +743,12 @@ var Game = {
 		$('#submitWord').on('click', method(this, 'submitWord'));
 
 		$('<p id="score">&nbsp;</p>').appendTo(this.place);
-		$('<p id="messages">Clabbers is like Scrabble, but you can play anagrams of real words. Place a word or an anagram of a word on the board. Then click Submit Word and type in the dictionary word of the anagram you placed.</p>').appendTo(this.place);
+		$('<p id="messages">Clabbers is like Scrabble, but you can play anagrams of real dictionary words.</p>').appendTo(this.place);
 		$('<p id="scoreString">&nbsp;</p>').appendTo(this.place);
 		
 		var self = this;
 		
-		//children().children().children() means #hand table -> tbody -> tr -> td
+		//children().children().children() means #hand table -> tbody -> tr -> td.
 		//Hand click handlers
 		$('#hand').children().children().children().each(function() {
 			var $this = $(this);
@@ -1136,42 +1127,18 @@ var Game = {
 	}
 };
 
-function isInlineTests() {
-	var testBoard = Board.create(5, 5);
-	return (testBoard.isInline([[1,2], [1,3], [1, 4]]) == true) &&
-			(testBoard.isInline([[0, 2], [1, 2], [2, 2]]) == true) &&
-			(testBoard.isInline([[0, 3], [0, 4], [0, 1]]) == false) &&
-			(testBoard.isInline([[0, 1], [1, 2]]) == false) &&
-			(testBoard.isInline([[0, 1], [0, 2], [0, 3], [0, 0]]) == false) &&
-			(testBoard.isInline([[0, 0], [1, 1]]) == false) &&
-			(testBoard.isInline([[0, 1], [1, 0]]) == false);
-}
-function rowOrColumnTests() {
-	var testBoard = Board.create(5, 5);
-	return testBoard.rowOrColumn([[0, 2], [1, 2], [2, 2]]) == "row" &&
-			(testBoard.rowOrColumn([[1, 2], [1, 3], [1, 4]]) == "column") &&
-			(testBoard.rowOrColumn([[0, 3], [0, 4], [0, 1]]) == "column") &&
-			(testBoard.rowOrColumn([[0, 1], [1, 2]]) == false) &&
-			(testBoard.rowOrColumn([[0, 1], [1, 0]]) == false) &&
-			(testBoard.rowOrColumn([[0, 1]]) == "single");
-}
-function isValidHandTests(testBag) {
-	var testHand = Hand.create(testBag, {"B": 1, "A": 2, "Y": 1});
-	return testHand.isValidHand("BABY") == false &&
-		testHand.isValidHand("BAY") ==  true &&
-		testHand.isValidHand("BY") == true &&
-		testHand.isValidHand("XBY") == false &&
-		testHand.isValidHand("BAAY") == true;
-}
-
-console.log("rowOrColumn tests: " + rowOrColumnTests());
-console.log("isInline tests: " + isInlineTests());
-var testBag = Bag.create();
-console.log("isValidHand tests: " + isValidHandTests(testBag));
-
 var scrabble = Game.create(document.body);
 
 });
 </script>
+
+<script src="static/test.js">
+	console.log('boardSpecialsCheck: ' + boardSpecialsCheck());
+	console.log("rowOrColumn tests: " + rowOrColumnTests());
+	console.log("isInline tests: " + isInlineTests());
+	var testBag = Bag.create();
+	console.log("isValidHand tests: " + isValidHandTests(testBag));
+</script>
+
 </body>
 </html>

@@ -9,7 +9,6 @@ body {
 	-moz-user-select: moz-none;
 	-ms-user-select: none;
 	user-select: none;
-	background-color: lightgrey;
 }
 #header {
 	clear: right;
