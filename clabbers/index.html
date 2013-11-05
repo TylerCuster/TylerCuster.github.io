@@ -17,15 +17,25 @@ Non-fatal error when placing two tiles not touching each other
  -->
  
 <head>
+	<meta charset="UTF-8">
 	<link rel="stylesheet" type="text/css" href="static/style.css" />
 	<title>Clabbers</title>
-	<meta charset="UTF-8">
 </head>
 
 <body>
+<!-- 
+<div id="blank-form" title="Choose a blank letter">
+	<p>Choose a letter for the blank (?) tile</p>
+	<form>
+		<fieldset>
+			<input type="text" id="blank-input" />
+		</fieldset>
+	</form>
+</div> -->
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" ></script>
-<script src="static/ospd.js" ></script>
+<!-- <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script> -->
+<!-- <script src="static/ospd.js" ></script> -->
 <script type="text/javascript">
 
 $(document).ready(function () {
@@ -36,9 +46,9 @@ var HAND_SIZE = 7,
 BOARD_HEIGHT = 15,
 BOARD_WIDTH = 15,
 
-LETTER_VALUES = {"A": 1, "B": 3, "C": 3, "D": 2, "E": 1, "F": 4, "G": 2, "H": 4, "I": 1, "J": 8, "K": 5, "L": 1, "M": 3, "N": 1, "O": 1, "P": 3, "Q": 10, "R": 1, "S": 1, "T": 1, "U": 1, "V": 4, "W": 4, "X": 8, "Y": 4, "Z": 10, "*": 0},
+LETTER_VALUES = {"A": 1, "B": 3, "C": 3, "D": 2, "E": 1, "F": 4, "G": 2, "H": 4, "I": 1, "J": 8, "K": 5, "L": 1, "M": 3, "N": 1, "O": 1, "P": 3, "Q": 10, "R": 1, "S": 1, "T": 1, "U": 1, "V": 4, "W": 4, "X": 8, "Y": 4, "Z": 10, "?": 0},
 
-LETTER_COUNTS = {"A": 9, "B": 2, "C": 2, "D": 4, "E": 12, "F": 2, "G": 3, "H": 2, "I": 9, "J": 1, "K": 1, "L": 4, "M": 2, "N": 6, "O": 8, "P": 2, "Q": 1, "R": 6, "S": 4, "T": 6, "U": 4, "V": 2, "W": 2, "X": 1, "Y": 2, "Z": 1, "*": 2},
+LETTER_COUNTS = {"A": 9, "B": 2, "C": 2, "D": 4, "E": 12, "F": 2, "G": 3, "H": 2, "I": 9, "J": 1, "K": 1, "L": 4, "M": 2, "N": 6, "O": 8, "P": 2, "Q": 1, "R": 6, "S": 4, "T": 6, "U": 4, "V": 2, "W": 2, "X": 1, "Y": 2, "Z": 1, "?": 2},
 
 boardSpecialsText = [
 	['TW', '   ', '   ', 'DL', '   ', '   ', '   ', 'TW', '   ', '   ', '   ', 'DL', '   ', '   ', 'TW'],
@@ -221,7 +231,7 @@ var Hand = Dictionary.extend({
 		for (var i = 0; i < HAND_SIZE; i++) {
 			if (copy[i]) {
 				if (copy[i] == " ")
-					var tableCell = dom("TD", {"id": String(i)}, "*");
+					var tableCell = dom("TD", {"id": String(i)}, "?");
 				else
 					var tableCell = dom("TD", {"id": String(i)}, copy[i]);
 				}
@@ -744,7 +754,7 @@ var Game = {
 		$('<p id="score">&nbsp;</p>').appendTo(this.place);
 		$('<p id="messages">Clabbers is like Scrabble, but you can play anagrams of real dictionary words.</p>').appendTo(this.place);
 		$('<p id="scoreString">&nbsp;</p>').appendTo(this.place);
-		
+
 		var self = this;
 		
 		//children().children().children() means #hand table -> tbody -> tr -> td.
@@ -886,18 +896,19 @@ var Game = {
 			var word = self.board.boardToWord(rowOrColumn),
 				scoreString = "Play score: " + score + "\n\n";
 			scoreString += self.board.scorePlayPlusString(playPlus);
-			if (word.indexOf("*") != -1) {
-				var blankLetter = prompt("Enter letter for blank (*) tile");
+			if (word.indexOf("?") != -1) {
+				// $("#blank-form").dialog("open");
+				var blankLetter = prompt("Enter a letter for the blank (?) tile");
 				blank = true;
 				}
 			if (blank && blankLetter) {
-				// Replace * with letter chosen
+				// Replace ? with letter chosen
 				blank = false;
 				blankLetter = blankLetter.toUpperCase().slice(0,1);
 				$('#board').children().children().children().each( function() {
 					var square = $(this).attr("id"),
 						square = square.split("-");
-					if (self.board.valueAt(square[0], square[1]) == "*") {
+					if (self.board.valueAt(square[0], square[1]) == "?") {
 						self.board.removeLetter(square[0], square[1]);
 						self.board.placeLetter(square[0], square[1], blankLetter);
 						$('#' + square[0] + '-' + square[1]).text(blankLetter);
@@ -930,6 +941,11 @@ var Game = {
 					anagramWords.push( anagramWord );
 				}
 			});
+
+			// User submits answer for each word on board
+			var allAboard = function(anagramWords, wordList) {
+				return anagramWords.length == wordList.length;
+			}
 			
 			// Is string1 an anagram of string2?
 			var anagram = function(string1, string2) {
@@ -1011,7 +1027,7 @@ var Game = {
 				}
 			}
 			
-			if (self.board.isInline(rowOrColumn) && checkForOneLetter && self.board.isInSameRowOrColumn(play) && countPlay <= countUnlockedPlayPlus && !(word.indexOf("*") != -1) && anagramsCheck && validWordCheck && start) {
+			if (self.board.isInline(rowOrColumn) && checkForOneLetter && self.board.isInSameRowOrColumn(play) && countPlay <= countUnlockedPlayPlus && !(word.indexOf("?") != -1) && anagramsCheck && validWordCheck && allAboard(anagramWords, wordList) && start) {
 				self.letterEvent = null;
 				self.replenishHand(countPlay);
 				self.setPlayStyle(play);
@@ -1021,9 +1037,13 @@ var Game = {
 				var message = "Valid play: 	" + word,
 					playPlusAppendagesArray = playPlusAppendages(playPlus);				
 				if (playPlusAppendagesArray.length > 0)
-					message += ", " + playPlusAppendagesArray.join(", ");
+					message += " and " + playPlusAppendagesArray.join(" and ");
 				
-				message += " - " + anagramWords.join(", ");
+				if (anagramWords.length > 1) {
+					message += " are anagrams of the words " + anagramWords.join(" and ");
+				} else {
+					message += " is an anagram of the word " + anagramWords[0];
+				}
 				
 				$('#messages').text(message)
 					.removeClass('error');

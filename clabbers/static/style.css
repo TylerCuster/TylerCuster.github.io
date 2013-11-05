@@ -29,13 +29,13 @@ table {
 	background-color: white;
 }
 .TW {
-	background: linear-gradient(#FCD07E, #FFECC9, #FCD07E);
+	background: linear-gradient(#FFFF85, #FFFF91, #FFFF85);
 }
 .DW {
 	background: linear-gradient(#FF7878, #FF8080, #FF7878);
 }
 .TL {
-	background: linear-gradient(#5EB359, #7BFC74, #5EB359);
+	background: linear-gradient(#8FFF85, #9AFF91, #8FFF85);
 }
 .DL {
 	background: linear-gradient(#5D83FC, #7494FC, #5D83FC);
@@ -79,7 +79,7 @@ table {
 	font-weight: bold;
 }
 
-#board td:not(.empty):not(.selected-letter):hover {
+#board td:not(.empty):not(.selected-letter):not(.played-letter):hover {
 	color: black;
 	font-weight: bold;
 }
@@ -142,6 +142,9 @@ table {
 #score {
 	margin: 2.5em 0 1em 0;
 	font-weight: bold;
+	color: black;
+	text-shadow: 0 0 0.4em #8F7;
+	font-size: 20px;
 }
 
 #messages {
@@ -160,7 +163,9 @@ table {
 	display: inline;
 	text-align: right;
 	padding: 1em;
-	border: 1px solid black;
+	border: 2px solid black;
+	border-radius: 3px;
+	background: linear-gradient(to bottom right, #CCFFCF, #B3FFB8);
 }
 
 p.error {
@@ -217,6 +222,7 @@ button:active {
 	background:   -moz-linear-gradient(to bottom, #00C700, #00A300);
 	background:     -o-linear-gradient(to bottom, #00C700, #00A300);
 	background:        linear-gradient(to bottom, #00C700, #00A300);
+	color: white;
 }
 
 #submitWord:hover {
