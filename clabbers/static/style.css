@@ -1,26 +1,19 @@
 /*Main*/
 
 body {
+	background: url(stripe.png);
 	font-family: Arial, sans-serif;
-	margin: 0 5%;
+	margin: 0 30px;
+	height: 100%;
 	-webkit-touch-callout: none;
 	  -webkit-user-select: none;
 	   -khtml-user-select: none;
-	     -moz-user-select: moz-none;
+	     -moz-user-select: -moz-none;
 	      -ms-user-select: none;
-	          user-select: none;
-	max-width: 1400px;
 }
 
 table {
 	table-layout: fixed;
-}
-
-#header {
-	float: left;
-	padding: 1em 1em 1em 0;
-	width: 100%;
-	font-size: 2em;
 }
 
 /*Hand/Board classes*/
@@ -29,54 +22,96 @@ table {
 	background-color: white;
 }
 .TW {
+	background: #FFFF85;
+	background: -webkit-linear-gradient(#FFFF85, #FFFF91, #FFFF85);
+	background: -moz-linear-gradient(#FFFF85, #FFFF91, #FFFF85);
+	background: -ms-linear-gradient(#FFFF85, #FFFF91, #FFFF85);
+	background: -o-linear-gradient(#FFFF85, #FFFF91, #FFFF85);
 	background: linear-gradient(#FFFF85, #FFFF91, #FFFF85);
 }
 .DW {
+	background: #FF7878;
+	background: -webkit-linear-gradient(#FF7878, #FF8080, #FF7878);
+	background: -moz-linear-gradient(#FF7878, #FF8080, #FF7878);
+	background: -ms-linear-gradient(#FF7878, #FF8080, #FF7878);
+	background: -o-linear-gradient(#FF7878, #FF8080, #FF7878);
 	background: linear-gradient(#FF7878, #FF8080, #FF7878);
 }
 .TL {
+	background: #8FFF85;
+	background: -webkit-linear-gradient(#8FFF85, #9AFF91, #8FFF85);
+	background: -moz-linear-gradient(#8FFF85, #9AFF91, #8FFF85);
+	background: -ms-linear-gradient(#8FFF85, #9AFF91, #8FFF85);
+	background: -o-linear-gradient(#8FFF85, #9AFF91, #8FFF85);
 	background: linear-gradient(#8FFF85, #9AFF91, #8FFF85);
 }
 .DL {
+	background: #5D83FC;
+	background: -webkit-linear-gradient(#5D83FC, #7494FC, #5D83FC);
+	background: -moz-linear-gradient(#5D83FC, #7494FC, #5D83FC);
+	background: -ms-linear-gradient(#5D83FC, #7494FC, #5D83FC);
+	background: -o-linear-gradient(#5D83FC, #7494FC, #5D83FC);
 	background: linear-gradient(#5D83FC, #7494FC, #5D83FC);
 }
 .start {
+	background: #FF4F9E;
+	background: -webkit-linear-gradient(#FF4F9E, #FF6BAE, #FF4F9E);
+	background: -moz-linear-gradient(#FF4F9E, #FF6BAE, #FF4F9E);
+	background: -ms-linear-gradient(#FF4F9E, #FF6BAE, #FF4F9E);
+	background: -o-linear-gradient(#FF4F9E, #FF6BAE, #FF4F9E);
 	background: linear-gradient(#FF4F9E, #FF6BAE, #FF4F9E);
 }
 
 /*Board*/
 
 #board {
-	float: left;
+	position: relative;
+	top: 30px;
 	margin: 0 4em 2em 0;
 	border: 2px solid black;
 	border-radius: 5px;
 	box-shadow: 3px 5px 3px rgba(0, 0, 0, 0.5);
+	height: 500px;
+	width: 500px;
 	background: #ff670f;
 	background: -webkit-radial-gradient(circle, #FFD485, #ff670f);
+	background: -moz-radial-gradient(circle, #FFD485, #ff670f);
+	background: -ms-radial-gradient(circle, #FFD485, #ff670f);
+	background: -o-radial-gradient(circle, #FFD485, #ff670f);
+	background: radial-gradient(circle, #FFD485, #ff670f);
 }
 
 #board td {
 	font-size: 10px;
 	color: gray;
-	width: 40px;
-	height: 40px;
+	width: 30px;
+	height: 30px;
 	text-align: center;
 	border: 3px solid transparent;
 }
 
 #board td.placed-letter {
-	background: -webkit-radial-gradient(circle, green, #268F11);
 	color: white;
-	font-size: 30px;
+	font-size: 29px;
 	border: 1px solid black;
-	border-radius: 5px;
+	border-radius: 5px;	
+	background: #268F11;
+	background: -webkit-radial-gradient(circle, green, #268F11);
+	background: -moz-radial-gradient(circle, green, #268F11);
+	background: -ms-radial-gradient(circle, green, #268F11);
+	background: -o-radial-gradient(circle, green, #268F11);
+	background: radial-gradient(circle, green, #268F11);
 }
 
 #board td.placed-letter:not(.selected-letter):hover {
-	background: linear-gradient(#FF8C00, #ff670f, #FF8C00);
 	color: black;
 	font-weight: bold;
+	background: #FF8C00;
+	background: -webkit-linear-gradient(#FF8C00, #ff670f, #FF8C00);
+	background: -moz-linear-gradient(#FF8C00, #ff670f, #FF8C00);
+	background: -ms-linear-gradient(#FF8C00, #ff670f, #FF8C00);
+	background: -o-linear-gradient(#FF8C00, #ff670f, #FF8C00);
+	background: linear-gradient(#FF8C00, #ff670f, #FF8C00);
 }
 
 #board td:not(.empty):not(.selected-letter):not(.played-letter):hover {
@@ -85,26 +120,38 @@ table {
 }
 
 #board td.selected-letter {
-	background: -webkit-radial-gradient(circle, red, #FF5757);
 	color: black;
-	font-size: 30px;
+	font-size: 29px;
 	border: 1px solid black;
 	border-radius: 5px;
+	background: #FF5757;
+	background: -webkit-radial-gradient(circle, red, #FF5757);
+	background: -moz-radial-gradient(circle, red, #FF5757);
+	background: -ms-radial-gradient(circle, red, #FF5757);
+	background: -o-radial-gradient(circle, red, #FF5757);
+	background: radial-gradient(circle, red, #FF5757);
 }
 
 #board td.played-letter {
-	background: -webkit-radial-gradient(circle, #bda27e, #d2b48c);
 	color: black;
 	font-weight: normal;
-	font-size: 30px;
+	font-size: 29px;
 	border: 1px solid black;
 	border-radius: 5px;
+	background: #d2b48c;
+	background: -webkit-radial-gradient(circle, #bda27e, #d2b48c);
+	background: -moz-radial-gradient(circle, #bda27e, #d2b48c);
+	background: -ms-radial-gradient(circle, #bda27e, #d2b48c);
+	background: -o-radial-gradient(circle, #bda27e, #d2b48c);
+	background: radial-gradient(circle, #bda27e, #d2b48c);
 }
 
 /*Hand*/
 
 #hand {
-	position: relative;	
+	position: relative;
+	top: -608px;
+	left: 660px;
 	margin: 0em 0em 1.2em 0em;
 	width: 270px;
 	background: white;
@@ -116,11 +163,16 @@ table {
 
 #hand td{
 	text-align: center;
-	font-size: 30px;
-	width: 40px;
-	height: 40px;
+	font-size: 34px;
+	width: 35px;
+	height: 35px;
 	border-radius: 5px;
+	background: #d2b48c;
 	background: -webkit-radial-gradient(circle, #bda27e, #d2b48c);
+	background: -moz-radial-gradient(circle, #bda27e, #d2b48c);
+	background: -ms-radial-gradient(circle, #bda27e, #d2b48c);
+	background: -o-radial-gradient(circle, #bda27e, #d2b48c);
+	background: radial-gradient(circle, #bda27e, #d2b48c);
 }
 
 #hand td.empty-hand {
@@ -128,56 +180,42 @@ table {
 }
 
 #hand td:not(.empty-hand):not(.selected-letter):hover {
-	background: linear-gradient(#FF8C00, #ff670f, #FF8C00);
 	color: black;
 	font-weight: bold;
+	background: #FF8C00;
+	background: -webkit-linear-gradient(#FF8C00, #ff670f, #FF8C00);
+	background: -moz-linear-gradient(#FF8C00, #ff670f, #FF8C00);
+	background: -ms-linear-gradient(#FF8C00, #ff670f, #FF8C00);
+	background: -o-linear-gradient(#FF8C00, #ff670f, #FF8C00);
+	background: linear-gradient(#FF8C00, #ff670f, #FF8C00);
 }
 
 #hand td.selected-letter {
+	background: #FF5757;
 	background: -webkit-radial-gradient(circle, #FF0000, #FF5757);
-}
-
-/*Score & Messages*/
-
-#score {
-	margin: 2.5em 0 1em 0;
-	font-weight: bold;
-	color: black;
-	text-shadow: 0 0 0.4em #8F7;
-	font-size: 20px;
-}
-
-#messages {
-	margin: 1em 1em 1.2em 0;
-	font-weight: bold;
-	font-size: 25px;
-}
-
-#scoreString {
-	margin: 0 1em 1em 0;
-	font-weight: bold;
-}
-
-.text-border {
-	float: left;
-	display: inline;
-	text-align: right;
-	padding: 1em;
-	border: 2px solid black;
-	border-radius: 3px;
-	background: linear-gradient(to bottom right, #CCFFCF, #B3FFB8);
-}
-
-p.error {
-	color: red;
+	background: -moz-radial-gradient(circle, #FF0000, #FF5757);
+	background: -ms-radial-gradient(circle, #FF0000, #FF5757);
+	background: -o-radial-gradient(circle, #FF0000, #FF5757);
+	background: radial-gradient(circle, #FF0000, #FF5757);
 }
 
 /*Buttons*/
 
+#buttons {
+	position: relative;
+	top: -610px;
+	left: 660px;
+	width: 220px;
+	padding: 10px;
+	border: 2px solid black;
+	border-radius: 3px;
+	background: white;
+}
+
 button {
-	display: block;
+	display: inline-block;
 	margin: 0.5em 0.3em 0.2em 0;
-	font-size: 25px;
+	font-size: 15px;
 	border: 1px solid black;
 	padding: 5px 10px;
 
@@ -193,18 +231,18 @@ button {
 	background: linear-gradient(to bottom, #E3E3E3, #CCCCCC);
 	background: -webkit-gradient(linear,top,bottom,from(#E3E3E3),to(#CCCCCC));
 	background: -webkit-linear-gradient(to bottom, #E3E3E3, #CCCCCC);
-	background:   -moz-linear-gradient(to bottom, #E3E3E3, #CCCCCC);
-	background:     -o-linear-gradient(to bottom, #E3E3E3, #CCCCCC);
+	background: -moz-linear-gradient(to bottom, #E3E3E3, #CCCCCC);
+	background: -o-linear-gradient(to bottom, #E3E3E3, #CCCCCC);
 }
 
 button:hover {
+	border: 1px solid #B5B5B5;
 	background: #E3E3E3;
 	background: -webkit-gradient(linear,left top,left bottom,from(#CCCCCC),to(#ADADAD));
 	background: -webkit-linear-gradient(to bottom, #CCCCCC, #ADADAD);
-	background:   -moz-linear-gradient(to bottom, #CCCCCC, #ADADAD);
-	background:     -o-linear-gradient(to bottom, #CCCCCC, #ADADAD);
-	background:        linear-gradient(to bottom, #CCCCCC, #ADADAD);
-	border: 1px solid #B5B5B5;
+	background: -moz-linear-gradient(to bottom, #CCCCCC, #ADADAD);
+	background: -o-linear-gradient(to bottom, #CCCCCC, #ADADAD);
+	background: linear-gradient(to bottom, #CCCCCC, #ADADAD);
 }
 
 button:active {
@@ -216,20 +254,73 @@ button:active {
 }
 
 #submitWord {
+	display: block;
+	font-size: 20px;
+	color: white;
+	margin: 10px auto;
 	background: #00A300;
 	background: -webkit-gradient(linear,left top,left bottom,from(#00C700),to(#00A300));
 	background: -webkit-linear-gradient(to bottom, #00C700, #00A300);
-	background:   -moz-linear-gradient(to bottom, #00C700, #00A300);
-	background:     -o-linear-gradient(to bottom, #00C700, #00A300);
-	background:        linear-gradient(to bottom, #00C700, #00A300);
-	color: white;
+	background: -moz-linear-gradient(to bottom, #00C700, #00A300);
+	background: -o-linear-gradient(to bottom, #00C700, #00A300);
+	background: linear-gradient(to bottom, #00C700, #00A300);
 }
 
 #submitWord:hover {
 	background: #E3E3E3;
 	background: -webkit-gradient(linear,left top,left bottom,from(#007D00),to(#007D00));
 	background: -webkit-linear-gradient(to bottom, #007D00, #007D00);
-	background:   -moz-linear-gradient(to bottom, #007D00, #007D00);
-	background:     -o-linear-gradient(to bottom, #007D00, #007D00);
-	background:        linear-gradient(to bottom, #007D00, #007D00);
+	background: -moz-linear-gradient(to bottom, #007D00, #007D00);
+	background: -o-linear-gradient(to bottom, #007D00, #007D00);
+	background: linear-gradient(to bottom, #007D00, #007D00);
+}
+
+/*Score & Messages*/
+
+#messages {
+	position: relative;
+	top: -600px;
+	left: 660px;
+	width: 300px;
+	font-size: 25px;
+	border: 2px solid black;
+	border-radius: 3px;
+	padding: 15px;
+	background: white;
+}
+
+#score {
+	position: relative;
+	top: -600px;
+	left: 660px;
+	width: 240px;
+	font-weight: bold;
+	color: green;
+	text-shadow: 0 0 0.4em gray;
+	font-size: 30px;
+}
+
+#scoreString {
+	font-weight: bold;
+}
+
+.score-border {
+	position: relative;
+	top: -625px;
+	left: 660px;
+	width: 250px;
+	text-align: right;
+	padding: 15px;
+	border: 2px solid black;
+	border-radius: 3px;
+	background: #B3FFB8;
+	background: -webkit-linear-gradient(to bottom right, #CCFFCF, #B3FFB8);
+	background: -moz-linear-gradient(to bottom right, #CCFFCF, #B3FFB8);
+	background: -ms-linear-gradient(to bottom right, #CCFFCF, #B3FFB8);
+	background: -o-linear-gradient(to bottom right, #CCFFCF, #B3FFB8);
+	background: linear-gradient(to bottom right, #CCFFCF, #B3FFB8);
+}
+
+p.error {
+	color: red;
 }
