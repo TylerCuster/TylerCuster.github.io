@@ -4,7 +4,6 @@ body {
 	background: url(stripe.png);
 	font-family: Arial, sans-serif;
 	margin: 0 30px;
-	height: 100%;
 	-webkit-touch-callout: none;
 	  -webkit-user-select: none;
 	   -khtml-user-select: none;
@@ -65,7 +64,7 @@ table {
 /*Board*/
 
 #board {
-	position: relative;
+	position: absolute;
 	top: 30px;
 	margin: 0 4em 2em 0;
 	border: 2px solid black;
@@ -92,7 +91,7 @@ table {
 
 #board td.placed-letter {
 	color: white;
-	font-size: 29px;
+	font-size: 28px;
 	border: 1px solid black;
 	border-radius: 5px;	
 	background: #268F11;
@@ -121,7 +120,7 @@ table {
 
 #board td.selected-letter {
 	color: black;
-	font-size: 29px;
+	font-size: 28px;
 	border: 1px solid black;
 	border-radius: 5px;
 	background: #FF5757;
@@ -135,7 +134,7 @@ table {
 #board td.played-letter {
 	color: black;
 	font-weight: normal;
-	font-size: 29px;
+	font-size: 28px;
 	border: 1px solid black;
 	border-radius: 5px;
 	background: #d2b48c;
@@ -149,9 +148,9 @@ table {
 /*Hand*/
 
 #hand {
-	position: relative;
-	top: -608px;
-	left: 660px;
+	position: absolute;
+	top: 31px;
+	left: 690px;
 	margin: 0em 0em 1.2em 0em;
 	width: 270px;
 	background: white;
@@ -163,9 +162,9 @@ table {
 
 #hand td{
 	text-align: center;
-	font-size: 34px;
-	width: 35px;
-	height: 35px;
+	font-size: 37px;
+	width: 45px;
+	height: 45px;
 	border-radius: 5px;
 	background: #d2b48c;
 	background: -webkit-radial-gradient(circle, #bda27e, #d2b48c);
@@ -202,14 +201,13 @@ table {
 /*Buttons*/
 
 #buttons {
-	position: relative;
-	top: -610px;
-	left: 660px;
-	width: 220px;
-	padding: 10px;
+	position: absolute;
+	top: 130px;
+	left: 690px;
 	border: 2px solid black;
 	border-radius: 3px;
 	background: white;
+	padding: 10px;
 }
 
 button {
@@ -278,21 +276,22 @@ button:active {
 /*Score & Messages*/
 
 #messages {
-	position: relative;
-	top: -600px;
-	left: 660px;
-	width: 300px;
-	font-size: 25px;
+	position: absolute;
+	top: 260px;
+	left: 690px;
+	width: 320px;
+	height: 90px;
+	font-size: 20px;
 	border: 2px solid black;
 	border-radius: 3px;
-	padding: 15px;
+	padding: 15px 20px;
 	background: white;
 }
 
 #score {
-	position: relative;
-	top: -600px;
-	left: 660px;
+	position: absolute;
+	top: 390px;
+	left: 690px;
 	width: 240px;
 	font-weight: bold;
 	color: green;
@@ -305,9 +304,9 @@ button:active {
 }
 
 .score-border {
-	position: relative;
-	top: -625px;
-	left: 660px;
+	position: absolute;
+	top: 440px;
+	left: 690px;
 	width: 250px;
 	text-align: right;
 	padding: 15px;
