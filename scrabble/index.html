@@ -3,6 +3,8 @@
 <html> 
 <!-- 
 
+Fix css bugs: resizing top row
+
 Re-write filtering functions findPlay, etc. using Jquery.grep
 
 bug reporting e-mail
@@ -15,7 +17,7 @@ Non-fatal error when placing two tiles not touching each other
 <head>
 	<meta charset="UTF-8">
 	<link rel="stylesheet" type="text/css" href="static/style.css" />
-	<title>Clabbers</title>
+	<title>Scrabble</title>
 </head>
 
 <body>
@@ -234,7 +236,7 @@ var Hand = Dictionary.extend({
 		return true;
 	},
 	grabLetter: function() {
-	if (this.bag.count() > 1) {
+	if (this.bag.count() > 0) {
 		newLetter = this.bag.selectRandomLetter();
 		this.addLetter(newLetter);
 		this.bag.remove(newLetter);
@@ -713,8 +715,6 @@ var Game = {
 		this.score = 0;
 		this.letterEvent = null;
 		
-		// $('<div id="header">C L A B B E R S <font size="3"> an anagram variant of Scrabble</font></div>').appendTo(this.place);
-		
 		this.initial();
 		
 		$('<div id="buttons">' +
@@ -727,7 +727,7 @@ var Game = {
 		$('#returnTiles').on('click', method(this, 'returnTiles'));
 		$('#submitWord').on('click', method(this, 'submitWord'));
 
-		$('<p id="messages"><em>Clabbers</em> is like <em>Scrabble</em>, but you can play anagrams of real dictionary words.</p>').appendTo(this.place);
+		$('<p id="messages"><em>Scrabble</em>. Enjoy! <br><br><small>Please submit bugs or comments to TylerJCuster@gmail.com</small></p>').appendTo(this.place);
 		$('<p id="score">&nbsp;</p>').appendTo(this.place);
 		$('<p id="scoreString">&nbsp;</p>').appendTo(this.place);
 
@@ -904,47 +904,14 @@ var Game = {
 				return appendageWords;
 			}
 			
-			var anagramsCheck = true;
 			var validWordCheck = false;
 			var wordList = playPlusAppendages(playPlus);
 			wordList.unshift(word);
-			var anagramWords = [];
-			anagramsCheck = false;
-			$.each(wordList, function( i, element ) {
-				var anagramWord = prompt("Enter your intended dictionary word for the anagram " + String(element) + ": "); 
-				if (typeof(anagramWord) == "string") {
-					anagramWord = anagramWord.toUpperCase();
-					anagramWords.push( anagramWord );
-				}
-			});
-
-			// User submits answer for each word on board
-			var allAboard = function(anagramWords, wordList) {
-				return anagramWords.length == wordList.length;
-			}
-			
-			// Returns true if str1 is an anagram of str2, false otherwise
-			var anagram = function(str1, str2) {
-				return str1.split("").sort().join("") === str2.split("").sort().join("");
-			}
-			
-			var validAnagrams = function( anagramWords ) {
-				var check = true;
-				if (anagramWords.length < 1) {
-					check = false;
-				}
-				$.each(anagramWords, function( i, element ) {
-					if ((anagram( wordList[i], element )) == false) {
-						check = false;
-					}
-				});
-				return check;
-			}
 			
 			// Checks if each word played is in the dictionary
-			var validWord = function(anagramWords) {
+			var validWord = function(wordList) {
 				var check = true;
-				$.each(anagramWords, function( i, element ) {
+				$.each(wordList, function( i, element ) {
 					var elementLowerCase = element.toLowerCase();
 					// Scans dictionary array for the string elementLowerCase
 					if ($.inArray(elementLowerCase, scrabbleDictionaryArray) == -1) {
@@ -953,11 +920,8 @@ var Game = {
 				});
 				return check;
 			}
-			
-			if (validAnagrams(anagramWords) == true) {
-				anagramsCheck = true;
-			}
-			if (validWord(anagramWords) == true) {
+
+			if (validWord(wordList) == true) {
 				validWordCheck = true;
 			}			
 			
@@ -982,7 +946,7 @@ var Game = {
 				}
 			}
 			
-			if (self.board.isInline(rowOrColumn) && checkForOneLetter && self.board.isInSameRowOrColumn(play) && countPlay <= countUnlockedPlayPlus && !(word.indexOf("?") != -1) && anagramsCheck && validWordCheck && allAboard(anagramWords, wordList) && start) {
+			if (self.board.isInline(rowOrColumn) && checkForOneLetter && self.board.isInSameRowOrColumn(play) && countPlay <= countUnlockedPlayPlus && !(word.indexOf("?") != -1) && validWordCheck && start) {
 				self.letterEvent = null;
 				self.replenishHand(countPlay);
 				self.setPlayStyle(play);
@@ -993,12 +957,6 @@ var Game = {
 					playPlusAppendagesArray = playPlusAppendages(playPlus);				
 				if (playPlusAppendagesArray.length > 0)
 					message += " and " + playPlusAppendagesArray.join(" and ");
-				
-				if (anagramWords.length > 1) {
-					message += " are anagrams of the words " + anagramWords.join(" and ");
-				} else {
-					message += " is an anagram of the word " + anagramWords[0];
-				}
 				
 				$('#messages').text(message)
 					.removeClass('error');
@@ -1011,19 +969,16 @@ var Game = {
 			else {
 				var errorText = "Invalid play. ";
 				if (checkForOneLetter == false) {
-					errorText += "Your play must be connected to a previously played letter and in a consecutive line. ";
+					errorText += "Your play must be connected to a previously played letter. ";
 				}
 				if (self.board.isInline(rowOrColumn) == false) { 
 					errorText += "Tiles must be played in a consecutive straight line. ";
-				}
-				if (anagramsCheck == false) {
-					errorText += "The word you entered wasn't an anagram of the word on the board. ";
 				}
 				if (start == false) {
 					errorText += "The first play must include the starting square ST. ";
 				}
 				if (validWordCheck == false) {
-					errorText += "The word you typed is not in the dictionary. ";
+					errorText += "The word you entered is not in the dictionary. ";
 				}
 				
 				$('#messages').text(errorText)
