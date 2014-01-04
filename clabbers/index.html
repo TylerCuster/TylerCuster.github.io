@@ -3,8 +3,6 @@
 <html> 
 <!-- 
 
-Re-write findPlayPlus using function handler
-
 Re-write filtering functions findPlay, etc. using Jquery.grep
 
 bug reporting e-mail
@@ -22,58 +20,54 @@ Non-fatal error when placing two tiles not touching each other
 
 <body>
 
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" ></script>
-<script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" ></script> -->
+<script src="jquery-1.10.2.js"></script>
+<!-- <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script> -->
 <script src="static/ospd.js" ></script>
 <script type="text/javascript">
 
 $(document).ready(function () {
 
 $.getScript("static/ospd.js");
-
 var HAND_SIZE = 7,
-BOARD_HEIGHT = 15,
-BOARD_WIDTH = 15,
-
-LETTER_VALUES = {"A": 1, "B": 3, "C": 3, "D": 2, "E": 1, "F": 4, "G": 2, "H": 4, "I": 1, "J": 8, "K": 5, "L": 1, "M": 3, "N": 1, "O": 1, "P": 3, "Q": 10, "R": 1, "S": 1, "T": 1, "U": 1, "V": 4, "W": 4, "X": 8, "Y": 4, "Z": 10, "?": 0},
-
-LETTER_COUNTS = {"A": 9, "B": 2, "C": 2, "D": 4, "E": 12, "F": 2, "G": 3, "H": 2, "I": 9, "J": 1, "K": 1, "L": 4, "M": 2, "N": 6, "O": 8, "P": 2, "Q": 1, "R": 6, "S": 4, "T": 6, "U": 4, "V": 2, "W": 2, "X": 1, "Y": 2, "Z": 1, "?": 2},
-
-boardSpecialsText = [
-	['TW', '   ', '   ', 'DL', '   ', '   ', '   ', 'TW', '   ', '   ', '   ', 'DL', '   ', '   ', 'TW'],
-	['   ', 'DW', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'DW', '   '],
-	['   ', '   ', 'DW', '   ', '   ', '   ', 'DL', '   ', 'DL', '   ', '   ', '   ', 'DW', '   ', '   '],
-	['DL', '   ', '   ', 'DW', '   ', '   ', '   ', 'DL', '   ', '   ', '   ', 'DW', '   ', '   ', 'DL'],
-	['   ', '   ', '   ', '   ', 'DW', '   ', '   ', '   ', '   ', '   ', 'DW', '   ', '   ', '   ', '   '],
-	['   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   '],
-	['   ', '   ', 'DL', '   ', '   ', '   ', 'DL', '   ', 'DL', '   ', '   ', '   ', 'DL', '   ', '   '],
-	['TW', '   ', '   ', 'DL', '   ', '   ', '   ', 'ST', '   ', '   ', '   ', 'DL', '   ', '   ', 'TW'],
-	['   ', '   ', 'DL', '   ', '   ', '   ', 'DL', '   ', 'DL', '   ', '   ', '   ', 'DL', '   ', '   '],
-	['   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   '],
-	['   ', '   ', '   ', '   ', 'DW', '   ', '   ', '   ', '   ', '   ', 'DW', '   ', '   ', '   ', '   '],
-	['DL', '   ', '   ', 'DW', '   ', '   ', '   ', 'DL', '   ', '   ', '   ', 'DW', '   ', '   ', 'DL'],
-	['   ', '   ', 'DW', '   ', '   ', '   ', 'DL', '   ', 'DL', '   ', '   ', '   ', 'DW', '   ', '   '],
-	['   ', 'DW', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'DW', '   '],
-	['TW', '   ', '   ', 'DL', '   ', '   ', '   ', 'TW', '   ', '   ', '   ', 'DL', '   ', '   ', 'TW']
-],
-
-boardSpecials = [
-	['TW', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'TW', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'TW'],
-	['empty', 'DW', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'DW', 'empty'],
-	['empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'DL', 'empty', 'DL', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty'],
-	['DL', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'DL'],
-	['empty', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'empty'],
-	['empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty'],
-	['empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'DL', 'empty', 'DL', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty'],
-	['TW', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'start', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'TW'],
-	['empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'DL', 'empty', 'DL', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty'],
-	['empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty'],
-	['empty', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'empty'],
-	['DL', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'DL'],
-	['empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'DL', 'empty', 'DL', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty'],
-	['empty', 'DW', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'DW', 'empty'],
-	['TW', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'TW', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'TW']
-]
+	BOARD_HEIGHT = 15,
+	BOARD_WIDTH = 15,
+	LETTER_VALUES = {"A": 1, "B": 3, "C": 3, "D": 2, "E": 1, "F": 4, "G": 2, "H": 4, "I": 1, "J": 8, "K": 5, "L": 1, "M": 3, "N": 1, "O": 1, "P": 3, "Q": 10, "R": 1, "S": 1, "T": 1, "U": 1, "V": 4, "W": 4, "X": 8, "Y": 4, "Z": 10, "?": 0},
+	LETTER_COUNTS = {"A": 9, "B": 2, "C": 2, "D": 4, "E": 12, "F": 2, "G": 3, "H": 2, "I": 9, "J": 1, "K": 1, "L": 4, "M": 2, "N": 6, "O": 8, "P": 2, "Q": 1, "R": 6, "S": 4, "T": 6, "U": 4, "V": 2, "W": 2, "X": 1, "Y": 2, "Z": 1, "?": 2},
+	boardSpecialsText = [
+		['TW', '   ', '   ', 'DL', '   ', '   ', '   ', 'TW', '   ', '   ', '   ', 'DL', '   ', '   ', 'TW'],
+		['   ', 'DW', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'DW', '   '],
+		['   ', '   ', 'DW', '   ', '   ', '   ', 'DL', '   ', 'DL', '   ', '   ', '   ', 'DW', '   ', '   '],
+		['DL', '   ', '   ', 'DW', '   ', '   ', '   ', 'DL', '   ', '   ', '   ', 'DW', '   ', '   ', 'DL'],
+		['   ', '   ', '   ', '   ', 'DW', '   ', '   ', '   ', '   ', '   ', 'DW', '   ', '   ', '   ', '   '],
+		['   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   '],
+		['   ', '   ', 'DL', '   ', '   ', '   ', 'DL', '   ', 'DL', '   ', '   ', '   ', 'DL', '   ', '   '],
+		['TW', '   ', '   ', 'DL', '   ', '   ', '   ', 'ST', '   ', '   ', '   ', 'DL', '   ', '   ', 'TW'],
+		['   ', '   ', 'DL', '   ', '   ', '   ', 'DL', '   ', 'DL', '   ', '   ', '   ', 'DL', '   ', '   '],
+		['   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   '],
+		['   ', '   ', '   ', '   ', 'DW', '   ', '   ', '   ', '   ', '   ', 'DW', '   ', '   ', '   ', '   '],
+		['DL', '   ', '   ', 'DW', '   ', '   ', '   ', 'DL', '   ', '   ', '   ', 'DW', '   ', '   ', 'DL'],
+		['   ', '   ', 'DW', '   ', '   ', '   ', 'DL', '   ', 'DL', '   ', '   ', '   ', 'DW', '   ', '   '],
+		['   ', 'DW', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'TL', '   ', '   ', '   ', 'DW', '   '],
+		['TW', '   ', '   ', 'DL', '   ', '   ', '   ', 'TW', '   ', '   ', '   ', 'DL', '   ', '   ', 'TW']
+	],
+	boardSpecials = [
+		['TW', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'TW', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'TW'],
+		['empty', 'DW', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'DW', 'empty'],
+		['empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'DL', 'empty', 'DL', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty'],
+		['DL', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'DL'],
+		['empty', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'empty'],
+		['empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty'],
+		['empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'DL', 'empty', 'DL', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty'],
+		['TW', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'start', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'TW'],
+		['empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'DL', 'empty', 'DL', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty'],
+		['empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty'],
+		['empty', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'empty'],
+		['DL', 'empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty', 'DL'],
+		['empty', 'empty', 'DW', 'empty', 'empty', 'empty', 'DL', 'empty', 'DL', 'empty', 'empty', 'empty', 'DW', 'empty', 'empty'],
+		['empty', 'DW', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'TL', 'empty', 'empty', 'empty', 'DW', 'empty'],
+		['TW', 'empty', 'empty', 'DL', 'empty', 'empty', 'empty', 'TW', 'empty', 'empty', 'empty', 'DL', 'empty', 'empty', 'TW']
+	]
 
 // How many identical values between array1 and array2 where array1 and array2 are composed of arrays of length two
 function matches(array1, array2) {
@@ -487,14 +481,6 @@ var Board = {
 		}
 		return play;
 	},
-	// TODO: How to pass function with arguments to object when we don't know function's name?
-	playPlusHandler: function(fn) {
-		var fn = this[fn](play);
-		while (fn) {
-			playPlus.push(fn);
-			fn = this[fn](play);
-		}
-	},
 	rowAfterPlay: function(play) {
 		var lastInRow = play[play.length-1];
 		if (this.valueAt(lastInRow[0]+1, lastInRow[1]))
@@ -747,7 +733,7 @@ var Game = {
 
 		var self = this;
 		
-		//children().children().children() means #hand table -> tbody -> tr -> td.
+		//children().children().children() means #hand table -> tbody -> tr -> td
 		//Hand click handlers
 		$('#hand').children().children().children().each(function() {
 			var $this = $(this);
@@ -937,30 +923,9 @@ var Game = {
 				return anagramWords.length == wordList.length;
 			}
 			
-			// Is string1 an anagram of string2?
-			var anagram = function(string1, string2) {
-				var string1Array = [],
-					string2Array = [];
-				for (var i = 0; i < string1.length; i++) {
-					string1Array.push(string1[i]);
-				}
-				for (var i = 0; i < string2.length; i++) {
-					string2Array.push(string2[i]);
-				}
-				$.each(string1Array, function(i, element) {
-					if (string2Array.indexOf(element) != -1) {
-						string2Array.splice(string2Array.indexOf(element), 1);
-					}
-					else {
-						return false;
-					}
-				});
-				if (string2Array.length == 0) {
-					return true;
-				}
-				else {
-					return false;
-				}
+			// Returns true if str1 is an anagram of str2, false otherwise
+			var anagram = function(str1, str2) {
+				return str1.split("").sort().join("") === str2.split("").sort().join("");
 			}
 			
 			var validAnagrams = function( anagramWords ) {
